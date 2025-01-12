@@ -1,8 +1,8 @@
 ---
-name: "\U0001F6E0️ Refactor"
+name: "⚡️ Refactor"
 about: 리팩토링
 title: ''
-labels: ''
+labels: refactor
 assignees: ''
 
 ---

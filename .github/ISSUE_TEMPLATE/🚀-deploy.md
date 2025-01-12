@@ -2,7 +2,7 @@
 name: "\U0001F680 Deploy"
 about: 배포 관련 작업
 title: ''
-labels: ''
+labels: deploy
 assignees: ''
 
 ---

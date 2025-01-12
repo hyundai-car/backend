@@ -1,8 +1,8 @@
 ---
-name: "✨ Feature"
+name: "\U0001F340 Feature"
 about: 새로운 기능 추가
 title: ''
-labels: ''
+labels: feature
 assignees: ''
 
 ---
