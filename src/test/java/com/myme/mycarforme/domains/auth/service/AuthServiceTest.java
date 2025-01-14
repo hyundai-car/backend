@@ -1,6 +1,7 @@
 package com.myme.mycarforme.domains.auth.service;
 
 import com.myme.mycarforme.domains.auth.api.response.LoginResponse;
+import com.myme.mycarforme.domains.auth.api.response.ReissueResponse;
 import com.myme.mycarforme.domains.auth.client.KeycloakClient;
 import com.myme.mycarforme.domains.auth.dto.KeycloakTokenDto;
 import com.myme.mycarforme.domains.auth.dto.KeycloakUserInfoDto;
@@ -76,7 +77,7 @@ class AuthServiceTest {
                 .thenReturn(expectedToken);
 
         // when
-        KeycloakTokenDto result = authService.reissue(refreshToken);
+        ReissueResponse result = authService.reissue(refreshToken);
 
         // then
         assertThat(result).isNotNull();

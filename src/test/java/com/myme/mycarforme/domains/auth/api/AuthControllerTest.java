@@ -2,7 +2,9 @@ package com.myme.mycarforme.domains.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myme.mycarforme.domains.auth.api.request.LoginRequest;
+import com.myme.mycarforme.domains.auth.api.request.ReissueRequest;
 import com.myme.mycarforme.domains.auth.api.response.LoginResponse;
+import com.myme.mycarforme.domains.auth.api.response.ReissueResponse;
 import com.myme.mycarforme.domains.auth.dto.KeycloakTokenDto;
 import com.myme.mycarforme.domains.auth.dto.KeycloakUserInfoDto;
 import com.myme.mycarforme.domains.auth.service.AuthService;
@@ -83,17 +85,21 @@ class AuthControllerTest {
                 3600,
                 "openid profile email"
         );
-        when(authService.reissue(anyString())).thenReturn(tokenDto);
+        when(authService.reissue(anyString())).thenReturn(ReissueResponse.from(tokenDto));
+
+        // Create request body
+        ReissueRequest request = new ReissueRequest("test_refresh_token");
+        String requestJson = new ObjectMapper().writeValueAsString(request);
 
         // when & then
         mockMvc.perform(post("/api/auth/reissue")
-                        .param("refresh_token", "test_refresh_token")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.access_token").value(tokenDto.accessToken()))
-                .andExpect(jsonPath("$.refresh_token").value(tokenDto.refreshToken()))
-                .andExpect(jsonPath("$.token_type").value(tokenDto.tokenType()));
+                .andExpect(jsonPath("$.accessToken").value(tokenDto.accessToken()))
+                .andExpect(jsonPath("$.refreshToken").value(tokenDto.refreshToken()))
+                .andExpect(jsonPath("$.tokenType").value(tokenDto.tokenType()));
     }
 
     @Test
