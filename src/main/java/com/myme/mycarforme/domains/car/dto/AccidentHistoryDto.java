@@ -5,7 +5,7 @@ import com.myme.mycarforme.domains.car.domain.AccidentHistory;
 import java.time.LocalDateTime;
 
 public record AccidentHistoryDto(Long accidentHistoryId,
-                                 LocalDateTime accidentDate,
+                                 String accidentDate,
                                  Long carPartsPrice,
                                  Long carLaborPrice,
                                  Long carPaintPrice,
@@ -15,7 +15,7 @@ public record AccidentHistoryDto(Long accidentHistoryId,
     public static AccidentHistoryDto from(AccidentHistory accidentHistory) {
         return new AccidentHistoryDto(
                 accidentHistory.getId(),
-                accidentHistory.getAccidentDate(),
+                accidentHistory.getAccidentDate().toString(),
                 accidentHistory.getCarPartsPrice(),
                 accidentHistory.getCarLaborPrice(),
                 accidentHistory.getCarPaintPrice(),
