@@ -64,6 +64,7 @@ public class KeycloakClient {
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.add("grant_type", "refresh_token");
             params.add("client_id", clientId);
+            params.add("client_secret", clientSecret);
             params.add("refresh_token", refreshToken);
 
             return executeTokenRequest(params);

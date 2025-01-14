@@ -1,6 +1,7 @@
 package com.myme.mycarforme.domains.auth.service;
 
 import com.myme.mycarforme.domains.auth.api.response.LoginResponse;
+import com.myme.mycarforme.domains.auth.api.response.ReissueResponse;
 import com.myme.mycarforme.domains.auth.client.KeycloakClient;
 import com.myme.mycarforme.domains.auth.dto.KeycloakTokenDto;
 import com.myme.mycarforme.domains.auth.dto.KeycloakUserInfoDto;
@@ -21,8 +22,10 @@ public class AuthService {
         return LoginResponse.of(token, user);
     }
 
-    public KeycloakTokenDto reissue(String refreshToken) {
-        return keycloakClient.reissue(refreshToken);
+    public ReissueResponse reissue(String refreshToken) {
+        KeycloakTokenDto token = keycloakClient.reissue(refreshToken);
+
+        return ReissueResponse.from(token);
     }
 
     public boolean logout(String refreshToken) {
