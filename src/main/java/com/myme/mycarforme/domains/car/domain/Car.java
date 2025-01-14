@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,18 +31,18 @@ public class Car extends BaseTimeEntity {
     private Long mileage;
     private String driveType;
     private Long displacement;
-    private Double sellingPrice;
+    private Long sellingPrice;
     private String exteriorColor;
     private String interiorColor;
     private Long seating;
     private String fuelType;
     private String transmissionType;
-    private Long isOnSale;
+    private Integer isOnSale;
     private String location;
     private Double mmScore;
     private Double fuelEfficiency;
     private String mainImage;
-    private Double newCarPrice;
+    private Long newCarPrice;
     private Double savingAccount;
     private String carNumber;
     private Double accidentSeverity;
@@ -49,14 +50,14 @@ public class Car extends BaseTimeEntity {
     private Double predictedPrice;
     private Double cityEfficiency;
     private Double highwayEfficiency;
-    private String paymentDeliveryStatus;
+    private Integer paymentDeliveryStatus;
     private LocalDateTime contractedAt;
     private LocalDateTime payedAt;
     private LocalDateTime deliveryStartedAt;
     private LocalDateTime deliveryEndedAt;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
-    private List<AccidentHistory> accidentHistories;
+    private List<AccidentHistory> accidentHistories = new ArrayList<>();;
 
     @OneToOne(mappedBy = "car", cascade = CascadeType.ALL)
     private OptionList optionList;
@@ -79,12 +80,12 @@ public class Car extends BaseTimeEntity {
 
     @Builder
     private Car(String carName, String carType, Long year, String initialRegistration,
-                Long mileage, String driveType, Long displacement, Double sellingPrice,
+                Long mileage, String driveType, Long displacement, Long sellingPrice,
                 String exteriorColor, String interiorColor, Long seating, String fuelType,
-                String transmissionType, Long isOnSale, String location, Double mmScore,
-                Double fuelEfficiency, String mainImage, Double newCarPrice, Double savingAccount,
+                String transmissionType, Integer isOnSale, String location, Double mmScore,
+                Double fuelEfficiency, String mainImage, Long newCarPrice, Double savingAccount,
                 String carNumber, Double accidentSeverity, Double repairProbability, Double predictedPrice,
-                Double cityEfficiency, Double highwayEfficiency, String paymentDeliveryStatus,
+                Double cityEfficiency, Double highwayEfficiency, Integer paymentDeliveryStatus,
                 LocalDateTime contractedAt, LocalDateTime payedAt, LocalDateTime deliveryStartedAt,
                 LocalDateTime deliveryEndedAt, OptionList optionList) {
         this.carName = carName;
