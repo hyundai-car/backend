@@ -307,9 +307,16 @@ class CarServiceTest {
         // 옵션리스트 생성 및 설정
         OptionList optionList = createTestOptionList(car);
         ReflectionTestUtils.setField(car, "optionList", optionList);
+        // OptionList의 BaseTimeEntity 필드도 설정
+        ReflectionTestUtils.setField(optionList, "createdAt", now);
+        ReflectionTestUtils.setField(optionList, "updatedAt", now);
+        ReflectionTestUtils.setField(car, "optionList", optionList);
 
         // 사고이력 추가
         AccidentHistory accidentHistory = createTestAccidentHistory(car);
+        // AccidentHistory의 BaseTimeEntity 필드도 설정
+        ReflectionTestUtils.setField(accidentHistory, "createdAt", now);
+        ReflectionTestUtils.setField(accidentHistory, "updatedAt", now);
         car.getAccidentHistories().add(accidentHistory);
 
         given(carRepository.findByIdWithDetails(carId)).willReturn(Optional.of(car));
@@ -324,7 +331,8 @@ class CarServiceTest {
             assertThat(detail.year()).isEqualTo("2022");
             assertThat(detail.mileage()).isEqualTo(10000L);
             assertThat(detail.sellingPrice()).isEqualTo(2500L);
-            assertThat(detail.color()).isEqualTo("검정");
+            assertThat(detail.exteriorColor()).isEqualTo("검정");
+            assertThat(detail.interiorColor()).isEqualTo("크림색");
             assertThat(detail.displacement()).isEqualTo(1598L);
             assertThat(detail.fuelType()).isEqualTo("가솔린");
             assertThat(detail.transmissionType()).isEqualTo("자동8단");
@@ -368,7 +376,7 @@ class CarServiceTest {
                 .displacement(1598L)
                 .sellingPrice(2500L)
                 .exteriorColor("검정")
-                .interiorColor("블랙")
+                .interiorColor("크림색")
                 .seating(5L)
                 .fuelType("가솔린")
                 .transmissionType("자동8단")
