@@ -1,11 +1,13 @@
 package com.myme.mycarforme.domains.car.service;
 
 import com.myme.mycarforme.domains.car.api.request.CarSearchRequest;
-import com.myme.mycarforme.domains.car.domain.AccidentHistory;
-import com.myme.mycarforme.domains.car.domain.Car;
-import com.myme.mycarforme.domains.car.domain.OptionList;
+import com.myme.mycarforme.domains.car.domain.*;
 import com.myme.mycarforme.domains.car.dto.CarDetailDto;
 import com.myme.mycarforme.domains.car.dto.CarDto;
+import com.myme.mycarforme.domains.car.dto.DetailImageDto;
+import com.myme.mycarforme.domains.car.dto.Exterior360ImageDto;
+import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
+import com.myme.mycarforme.domains.car.exception.ImageNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -302,7 +304,7 @@ class CarServiceTest {
         ReflectionTestUtils.setField(car, "updatedAt", now);
 
         // accidentHistories 초기화
-        ReflectionTestUtils.setField(car, "accidentHistories", new ArrayList<>());
+        ReflectionTestUtils.setField(car, "accidentHistoryList", new ArrayList<>());
 
         // 옵션리스트 생성 및 설정
         OptionList optionList = createTestOptionList(car);
@@ -317,7 +319,7 @@ class CarServiceTest {
         // AccidentHistory의 BaseTimeEntity 필드도 설정
         ReflectionTestUtils.setField(accidentHistory, "createdAt", now);
         ReflectionTestUtils.setField(accidentHistory, "updatedAt", now);
-        car.getAccidentHistories().add(accidentHistory);
+        car.getAccidentHistoryList().add(accidentHistory);
 
         given(carRepository.findByIdWithDetails(carId)).willReturn(Optional.of(car));
 
@@ -352,11 +354,12 @@ class CarServiceTest {
             });
 
             // AccidentHistories 검증
-            assertThat(detail.accidentHistories())
+            assertThat(detail.accidentHistoryList())
                     .hasSize(1)
                     .first()
                     .satisfies(accident -> {
-                        assertThat(accident.accidentDate()).isEqualTo(LocalDateTime.of(2023, 5, 15, 0, 0));
+                        //assertThat(accident.accidentDate()).isEqualTo(LocalDateTime.of(2023, 5, 15, 0, 0));
+                        assertThat(accident.accidentDate()).isEqualTo("2023-05-15T00:00");
                         assertThat(accident.carPartsPrice()).isEqualTo(500L);
                         assertThat(accident.carLaborPrice()).isEqualTo(200L);
                         assertThat(accident.carPaintPrice()).isEqualTo(300L);
@@ -420,6 +423,10 @@ class CarServiceTest {
                 .build();
     }
 
+
+
+
+
     @Test
     void getCarDetail_whenCarNotExists_throwEntityNotFoundException() { // 차량이 존재하지 않을 때 적절한 예외를 발생????
         // given
@@ -428,13 +435,150 @@ class CarServiceTest {
         given(carRepository.findByIdWithDetails(carId)).willReturn(Optional.empty());
 
         // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
+        assertThrows(CarNotFoundException.class, () -> {
             carService.getCarDetail(carId);
         });
 
 
 
     }
+
+    // exterior 360 Image
+    @Test
+    void get360Images_whenImagesExist_returnAllImages() {
+        // given
+        Long carId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Car car = createTestCar();
+        List<Exterior360Image> images = createTest360Images(car);
+
+        // BaseTimeEntity 필드 설정
+        images.forEach(image -> {
+            ReflectionTestUtils.setField(image, "createdAt", now);
+            ReflectionTestUtils.setField(image, "updatedAt", now);
+        });
+
+        given(carRepository.findAllByCarIdOrderByRotationDegree(carId))
+                .willReturn(images);
+
+        // when
+        List<Exterior360ImageDto> result = carService.get360Images(carId);
+
+        // then
+        assertThat(result).hasSize(36);
+        assertThat(result).allSatisfy(image -> {
+            assertThat(image.imageUrl()).isNotNull();
+            assertThat(image.rotationDegree()).isBetween(0, 350);
+            assertThat(image.createdAt()).isNotNull();
+            assertThat(image.updatedAt()).isNotNull();
+        });
+
+        // 구체적인 검증
+        assertThat(result).anySatisfy(image -> {
+            assertThat(image.rotationDegree()).isEqualTo(0);
+            assertThat(image.imageUrl()).isEqualTo("exterior_0.jpg");
+        });
+
+        assertThat(result).anySatisfy(image -> {
+            assertThat(image.rotationDegree()).isEqualTo(350);
+            assertThat(image.imageUrl()).isEqualTo("exterior_350.jpg");
+        });
+    }
+
+    @Test
+    void get360Images_whenNoImagesExist_throwImageNotFoundException() {
+        // given
+        Long carId = 999L;
+        given(carRepository.findAllByCarIdOrderByRotationDegree(carId))
+                .willReturn(new ArrayList<>());
+
+        // when & then
+        assertThrows(ImageNotFoundException.class, () -> {
+            carService.get360Images(carId);
+        });
+    }
+
+    // 테스트 헬퍼 메서드
+    private List<Exterior360Image> createTest360Images(Car car) {
+        List<Exterior360Image> images = new ArrayList<>();
+        for (int degree = 0; degree <= 350; degree += 10) {
+            images.add(Exterior360Image.builder()
+                    .car(car)
+                    .imageUrl("exterior_" + degree + ".jpg")
+                    .rotationDegree(degree)
+                    .build());
+        }
+        return images;
+    }
+
+    // 차량 detail test
+    @Test
+    void getDetailImages_whenImagesExist_returnAllImages() {
+        // given
+        Long carId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Car car = createTestCar();
+        List<DetailImage> images = createTestDetailImages(car);
+
+        // BaseTimeEntity 필드 설정
+        images.forEach(image -> {
+            ReflectionTestUtils.setField(image, "createdAt", now);
+            ReflectionTestUtils.setField(image, "updatedAt", now);
+        });
+
+        given(carRepository.findAllDetailImagesByCarId(carId))
+                .willReturn(images);
+
+        // when
+        List<DetailImageDto> result = carService.getDetailImages(carId);
+
+        // then
+        assertThat(result).hasSize(5); // 예시로 5장의 이미지를 가정
+        assertThat(result).allSatisfy(image -> {
+            assertThat(image.detailImageId()).isNotNull();
+            assertThat(image.imageUrl()).isNotNull();
+            assertThat(image.createdAt()).isNotNull();
+            assertThat(image.updatedAt()).isNotNull();
+        });
+
+        // 구체적인 검증
+        assertThat(result).anySatisfy(image -> {
+            assertThat(image.imageUrl()).isEqualTo("detail_1.jpg");
+        });
+    }
+
+    @Test
+    void getDetailImages_whenNoImagesExist_throwImageNotFoundException() {
+        // given
+        Long carId = 999L;
+        given(carRepository.findAllDetailImagesByCarId(carId))
+                .willReturn(new ArrayList<>());
+
+        // when & then
+        assertThrows(ImageNotFoundException.class, () -> {
+            carService.getDetailImages(carId);
+        });
+    }
+
+    // 테스트 헬퍼 메서드
+    private List<DetailImage> createTestDetailImages(Car car) {
+        List<DetailImage> images = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            DetailImage image = DetailImage.builder()
+                    .car(car)
+                    .imageUrl("detail_" + i + ".jpg")
+                    .build();
+
+            // id 값 설정
+            ReflectionTestUtils.setField(image, "id", (long) i);
+
+            images.add(image);
+        }
+        return images;
+    }
+
+
+
 
 
 
