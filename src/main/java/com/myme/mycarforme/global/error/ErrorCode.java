@@ -26,7 +26,8 @@ public enum ErrorCode {
     DUPLICATE_USER(409, "U002", "유저가 이미 존재합니다."),
 
     // Car
-    CAR_NOT_FOUND(404, "R001", "차량을 찾을 수 없습니다.");
+    CAR_NOT_FOUND(404, "R001", "차량을 찾을 수 없습니다."),
+    IMAGE_NOT_FOUND(404,"R002","이미지를 찾을 수 없습니다.");
 
 
     // ...
