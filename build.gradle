@@ -53,6 +53,9 @@ dependencies {
 	// JSON Processing
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.json:json:20231013'
+
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'
 }
 
 tasks.named('test') {
