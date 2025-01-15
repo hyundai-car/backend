@@ -26,9 +26,14 @@ public class Like extends BaseTimeEntity {
     private Boolean isLike;
 
     @Builder
-    public Like(String userId, Car car, Boolean isLike) {
+    public Like(Long id, String userId, Car car, Boolean isLike) {
+        this.id = id;
         this.userId = userId;
         this.car = car;
         this.isLike = isLike;
+    }
+
+    public void toggleLike() {
+        this.isLike = !this.isLike;
     }
 }

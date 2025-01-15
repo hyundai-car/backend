@@ -1,5 +1,6 @@
 package com.myme.mycarforme.domains.car.domain;
 
+import com.myme.mycarforme.global.common.jpa.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name="detail_images")
-public class DetailImage {
+public class DetailImage extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
