@@ -23,7 +23,7 @@ public record CarDetailDto(Long carId,
                            String createdAt,
                            String updatedAt,
                            OptionListDto optionLists,
-                           List<AccidentHistoryDto> accidentHistories) {
+                           List<AccidentHistoryDto> accidentHistoryList) {
 
     public static CarDetailDto from(Car car) {
         return new CarDetailDto(
@@ -45,7 +45,7 @@ public record CarDetailDto(Long carId,
                 car.getCreatedAt() != null ? car.getCreatedAt().toString() : null,
                 car.getUpdatedAt() != null ? car.getUpdatedAt().toString() : null,
                 car.getOptionList() != null ? OptionListDto.from(car.getOptionList()) : null,
-                car.getAccidentHistories().stream()
+                car.getAccidentHistoryList().stream()
                         .map(AccidentHistoryDto::from)
                         .collect(Collectors.toList())
         );
