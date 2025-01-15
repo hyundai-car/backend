@@ -158,4 +158,81 @@ class LikeServiceTest {
         assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
         assertThat(result.isLike()).isTrue();
     }
+
+    @Test
+    void getLikeByCarId_whenCarExistAndLikeIsTrue_thenReturnLike() {
+        // Given
+        Like existingLike = Like.builder()
+                .id(1L)
+                .userId(TEST_USER_ID)
+                .car(TEST_CAR)
+                .isLike(true)
+                .build();
+
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
+
+        // When
+        LikeResponse result = likeService.getLikeByCarId(TEST_USER_ID, TEST_CAR_ID);
+
+        // Then
+        assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
+        assertThat(result.isLike()).isTrue();
+        verify(likeRepository).findById(anyLong());
+        verify(likeRepository).findByUserIdAndCarId(anyString(), anyLong());
+    }
+
+    @Test
+    void getLikeByCarId_whenCarExistAndLikeIsFalse_thenReturnLike() {
+        // Given
+        Like existingLike = Like.builder()
+                .id(1L)
+                .userId(TEST_USER_ID)
+                .car(TEST_CAR)
+                .isLike(true)
+                .build();
+
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
+
+        // When
+        LikeResponse result = likeService.getLikeByCarId(TEST_USER_ID, TEST_CAR_ID);
+
+        // Then
+        assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
+        assertThat(result.isLike()).isFalse();
+        verify(likeRepository).findById(anyLong());
+        verify(likeRepository).findByUserIdAndCarId(anyString(), anyLong());
+    }
+
+    @Test
+    void getLikeByCarId_whenCarExistAndLikeNull_thenReturnLike() {
+        // Given
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID))
+                .thenReturn(Optional.empty());
+
+        // When
+        LikeResponse result = likeService.getLikeByCarId(TEST_USER_ID, TEST_CAR_ID);
+
+        // Then
+        assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
+        assertThat(result.isLike()).isFalse();
+        verify(likeRepository).findById(anyLong());
+        verify(likeRepository).findByUserIdAndCarId(anyString(), anyLong());
+    }
+
+    @Test
+    void getLikeByCarId_whenCarNull_throwException() {
+        // Given
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> likeService.getLikeByCarId(TEST_USER_ID, TEST_CAR_ID))
+                .isInstanceOf(CarNotFoundException.class);
+
+        verify(carRepository).findById(TEST_CAR_ID);
+        verify(likeRepository).findById(anyLong());
+        verify(likeRepository, never()).findByUserIdAndCarId(anyString(), anyLong());
+    }
 }
