@@ -21,7 +21,7 @@ public class LikeService {
         Car currentCar = carRepository.findById(carId)
                 .orElseThrow(CarNotFoundException::new);
 
-        Like currentlike = likeRepository.findByUserIdAndCarId(userId, currentCar.getId())
+        Like currentLike = likeRepository.findByUserIdAndCarId(userId, currentCar.getId())
                 .orElseGet(() -> Like.builder()
                         .userId(userId)
                         .car(currentCar)
@@ -29,10 +29,25 @@ public class LikeService {
                         .build()
                 );
 
-        currentlike.toggleLike();
+        currentLike.toggleLike();
 
-        likeRepository.save(currentlike);
+        likeRepository.save(currentLike);
 
-        return new LikeResponse(currentCar.getId(), currentlike.getIsLike());
+        return new LikeResponse(currentCar.getId(), currentLike.getIsLike());
+    }
+
+    public LikeResponse getLikeByCarId(String userId, Long carId) {
+        Car currentCar = carRepository.findById(carId)
+                .orElseThrow(CarNotFoundException::new);
+
+        Like currentLike = likeRepository.findByUserIdAndCarId(userId, currentCar.getId())
+                .orElseGet(() -> Like.builder()
+                        .userId(userId)
+                        .car(currentCar)
+                        .isLike(false)
+                        .build()
+                );
+
+        return new LikeResponse(currentCar.getId(), currentLike.getIsLike());
     }
 }

@@ -16,7 +16,6 @@ public class Like extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
     private String userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
