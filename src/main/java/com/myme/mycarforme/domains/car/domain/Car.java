@@ -61,22 +61,21 @@ public class Car extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "car", cascade = CascadeType.ALL)
     private OptionList optionList;
+
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
+    private List<Like> likeList;
 //
 //    @OneToMany(mappedBy = "car")
-//    private List<Like> likes;
+//    private List<Visit> visitList;
 //
 //    @OneToMany(mappedBy = "car")
-//    private List<Visit> visits;
-//
-//    @OneToMany(mappedBy = "car")
-//    private List<Recommend> recommends;
+//    private List<Recommend> recommendList;
 //
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<Exterior360Image> exterior360Images;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<DetailImage> detailImages;
-
 
     @Builder
     private Car(String carName, String carType, Long year, String initialRegistration,
