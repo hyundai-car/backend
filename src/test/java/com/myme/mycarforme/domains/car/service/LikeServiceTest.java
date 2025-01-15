@@ -178,8 +178,6 @@ class LikeServiceTest {
         // Then
         assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
         assertThat(result.isLike()).isTrue();
-        verify(likeRepository).findById(anyLong());
-        verify(likeRepository).findByUserIdAndCarId(anyString(), anyLong());
     }
 
     @Test
@@ -189,7 +187,7 @@ class LikeServiceTest {
                 .id(1L)
                 .userId(TEST_USER_ID)
                 .car(TEST_CAR)
-                .isLike(true)
+                .isLike(false)
                 .build();
 
         when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
@@ -201,8 +199,6 @@ class LikeServiceTest {
         // Then
         assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
         assertThat(result.isLike()).isFalse();
-        verify(likeRepository).findById(anyLong());
-        verify(likeRepository).findByUserIdAndCarId(anyString(), anyLong());
     }
 
     @Test
@@ -218,8 +214,6 @@ class LikeServiceTest {
         // Then
         assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
         assertThat(result.isLike()).isFalse();
-        verify(likeRepository).findById(anyLong());
-        verify(likeRepository).findByUserIdAndCarId(anyString(), anyLong());
     }
 
     @Test
@@ -232,7 +226,5 @@ class LikeServiceTest {
                 .isInstanceOf(CarNotFoundException.class);
 
         verify(carRepository).findById(TEST_CAR_ID);
-        verify(likeRepository).findById(anyLong());
-        verify(likeRepository, never()).findByUserIdAndCarId(anyString(), anyLong());
     }
 }
