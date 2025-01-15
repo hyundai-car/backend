@@ -1,13 +1,16 @@
 package com.myme.mycarforme.domains.car.service;
 
+import com.myme.mycarforme.domains.car.api.response.LikeResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Like;
 import com.myme.mycarforme.domains.car.domain.OptionList;
+import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
 import com.myme.mycarforme.domains.car.repository.LikeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +19,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +40,7 @@ class LikeServiceTest {
     @BeforeEach
     void setUp() {
         TEST_CAR = Car.builder()
+                .id(TEST_CAR_ID) // ID를 포함
                 .carName("Test car")
                 .carType("luxury")
                 .year(2022L)
@@ -66,47 +69,48 @@ class LikeServiceTest {
                 .highwayEfficiency(11.0)
                 .paymentDeliveryStatus(0)
                 .optionList(OptionList.builder().build())
-        .build();
+                .build();
     }
 
     @Test
     void toggleLike_whenValidCar_thenReturnTrue() {
         // Given
         Like newLike = Like.builder()
+                .id(1L)
                 .userId(TEST_USER_ID)
                 .car(TEST_CAR)
                 .isLike(true)
                 .build();
 
-        when(carRepository.existsById(TEST_CAR_ID))
-                .thenReturn(true);
-
-        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID))
-                .thenReturn(Optional.empty());
-
-        when(likeRepository.save(newLike))
-                .thenReturn(newLike);
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.empty());
+        when(likeRepository.save(any(Like.class))).thenReturn(newLike);
 
         // When
-        boolean result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
+        LikeResponse result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
 
         // Then
-        assertThat(result).isTrue();
-        verify(likeRepository).existsById(anyLong());
-        verify(likeRepository).findByUserIdAndCarId(anyString(), anyLong());
-        verify(likeRepository).save(any());
+        ArgumentCaptor<Like> captor = ArgumentCaptor.forClass(Like.class);
+        verify(likeRepository).save(captor.capture());
+        Like capturedLike = captor.getValue();
+
+        assertThat(capturedLike.getUserId()).isEqualTo(TEST_USER_ID);
+        assertThat(capturedLike.getCar().getId()).isEqualTo(TEST_CAR_ID);
+        assertThat(capturedLike.getIsLike()).isTrue();
+        assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
+        assertThat(result.isLike()).isTrue();
     }
 
     @Test
     void toggleLike_whenInvalidCar_throwException() {
         // Given
-        when(carRepository.existsById(TEST_CAR_ID))
-                .thenReturn(false);
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.empty());
 
         // When & Then
         assertThatThrownBy(() -> likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID))
                 .isInstanceOf(CarNotFoundException.class);
-        verify(carRepository).existsById(TEST_CAR_ID);
+
+        verify(carRepository).findById(TEST_CAR_ID);
         verify(likeRepository, never()).findByUserIdAndCarId(anyString(), anyLong());
         verify(likeRepository, never()).save(any());
     }
@@ -115,58 +119,43 @@ class LikeServiceTest {
     void toggleLike_whenCarExistAndIsLikeTrue_thenReturnFalse() {
         // Given
         Like existingLike = Like.builder()
+                .id(1L)
                 .userId(TEST_USER_ID)
                 .car(TEST_CAR)
                 .isLike(true)
                 .build();
 
-        when(carRepository.existsById(TEST_CAR_ID))
-                .thenReturn(true);
-
-        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID))
-                .thenReturn(Optional.of(existingLike));
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
 
         // When
-        boolean result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
+        LikeResponse result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
 
         // Then
-        assertThat(result).isFalse();
-        verify(carRepository).existsById(TEST_CAR_ID);
-        verify(likeRepository).findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID);
-        verify(likeRepository, never()).save(any());
+        verify(likeRepository).save(any());
+        assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
+        assertThat(result.isLike()).isFalse();
     }
 
     @Test
     void toggleLike_whenCarExistAndIsLikeFalse_thenReturnTrue() {
         // Given
         Like existingLike = Like.builder()
+                .id(1L)
                 .userId(TEST_USER_ID)
                 .car(TEST_CAR)
                 .isLike(false)
                 .build();
 
-        Like updatedLike = Like.builder()
-                .userId(TEST_USER_ID)
-                .car(TEST_CAR)
-                .isLike(true)
-                .build();
-
-        when(carRepository.existsById(TEST_CAR_ID))
-                .thenReturn(true);
-
-        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID))
-                .thenReturn(Optional.of(existingLike));
-
-        when(likeRepository.save(updatedLike))
-                .thenReturn(updatedLike);
+        when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
 
         // When
-        boolean result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
+        LikeResponse result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
 
         // Then
-        assertThat(result).isTrue();
-        verify(carRepository).existsById(TEST_CAR_ID);
-        verify(likeRepository).findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID);
         verify(likeRepository).save(any());
+        assertThat(result.carId()).isEqualTo(TEST_CAR_ID);
+        assertThat(result.isLike()).isTrue();
     }
 }
