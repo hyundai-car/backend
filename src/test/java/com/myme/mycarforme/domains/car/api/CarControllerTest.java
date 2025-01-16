@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,8 +23,7 @@ import java.util.List;
 
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -42,21 +44,34 @@ class CarControllerTest {
     void searchCars_withNoCondition_success() throws Exception { // 검색 조건 X
         // given
         List<CarDto> cars = List.of(
-                new CarDto(1L, "아반떼 CN7", 2022L, 10000L, 2500L,
-                        "image1.jpg", "12가3456", "2023-01-01", "2023-01-01"),
-                new CarDto(2L, "소나타 DN8", 2021L, 20000L, 3000L,
-                        "image2.jpg", "34나5678", "2023-01-01", "2023-01-01")
+                new CarDto(1L, "아반떼 CN7", "23년 2월",10000L, 2500L,
+                        "image1.jpg", "12가3456", true, 1L,"2023-01-01","2023-01-01"),
+                new CarDto(2L, "소나타 DN8", "23년 5월", 20000L, 3000L,
+                        "image2.jpg", "34나5678",  true, 2L,"2023-01-01", "2023-01-01")
         );
 
-        given(carService.searchCars(any(CarSearchRequest.class))).willReturn(cars);
+        PageImpl<CarDto> carPage = new PageImpl<>(cars,
+                PageRequest.of(0, 10),
+                cars.size());
+
+        given(carService.searchCars(
+                any(CarSearchRequest.class),
+                anyString(),
+                any(Pageable.class))
+        ).willReturn(carPage);
 
         // when & then
-        mockMvc.perform(get("/api/cars"))
+        mockMvc.perform(get("/api/cars")
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                // contents 배열 내부의 요소를 검증하도록 수정
-                .andExpect(jsonPath("$.contents[0].carName").value("아반떼 CN7"))
-                .andExpect(jsonPath("$.contents[1].carName").value("소나타 DN8"));
+                .andExpect(jsonPath("$.content[0].carName").value("아반떼 CN7"))
+                .andExpect(jsonPath("$.content[1].carName").value("소나타 DN8"))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.number").value(0));
     }
 
     @Test
@@ -64,11 +79,19 @@ class CarControllerTest {
         // given
         String keyword = "아반떼";
         List<CarDto> cars = List.of(
-                new CarDto(1L, "아반떼 CN7", 2022L, 10000L, 2500L,
-                        "image1.jpg", "12가3456", "2023-01-01", "2023-01-01")
+                new CarDto(1L, "아반떼 CN7", "23년 2월",10000L, 2500L,
+                        "image1.jpg", "12가3456", true, 1L,"2023-01-01","2023-01-01")
         );
 
-        given(carService.searchCars(any(CarSearchRequest.class))).willReturn(cars);
+        PageImpl<CarDto> carPage = new PageImpl<>(cars,
+                PageRequest.of(0, 10),
+                cars.size());
+
+        given(carService.searchCars(
+                any(CarSearchRequest.class),
+                anyString(),
+                any(Pageable.class))
+        ).willReturn(carPage);
 
         // when & then
         mockMvc.perform(get("/api/cars")
@@ -100,7 +123,7 @@ class CarControllerTest {
     }
 
     @Test
-    void getCarDetail_withNonExistentCar_status404() throws Exception {
+    void getCarDetail_withNonExistentCar_status404() throws Exception { // 차가 존재하지 않음
         // given
         Long carId = 999L;
         given(carService.getCarDetail(eq(carId)))
@@ -117,27 +140,29 @@ class CarControllerTest {
 
 
     private CarDetailDto createTestCarDetailDto() {
-        return new CarDetailDto(
+        return  new CarDetailDto(
                 1L,                     // carId
                 "아반떼 CN7",           // carName
-                2022L,                 // year
-                10000L,                 // mileage
-                2500L,                  // sellingPrice
-                "검정",                 // exteriorColor
-                "블랙",                 // interiorColor
-                1598L,                  // displacement
-                "가솔린",               // fuelType
-                "자동8단",              // transmissionType
-                "서울 강남구",          // location
-                12.5,                   // fuelEfficiency
-                "main.jpg",             // mainImage
-                2800L,                  // newCarPrice
-                "12가3456",
-                5L,// carNumber
-                LocalDateTime.now().toString(),  // createdAt
-                LocalDateTime.now().toString(),  // updatedAt
-                createTestOptionListDto(),       // optionLists
-                List.of(createTestAccidentHistoryDto())  // accidentHistories
+                "2022-01",             // initialRegistration (String으로 변경)
+                10000L,                // mileage
+                2500L,                 // sellingPrice
+                95.5,                  // mmScore 추가
+                "검정",                // exteriorColor
+                "블랙",                // interiorColor
+                1598L,                 // displacement
+                "가솔린",              // fuelType
+                "자동8단",             // transmissionType
+                "서울 강남구",         // location
+                12.5,                  // fuelEfficiency
+                "main.jpg",            // mainImage
+                2800L,                 // newCarPrice
+                "12가3456",            // carNumber
+                5L,                    // seating
+                LocalDateTime.now().toString(),   // createdAt
+                LocalDateTime.now().toString(),   // updatedAt
+                createTestOptionListDto(),        // optionLists
+                List.of(createTestAccidentHistoryDto()), // accidentHistoryList
+                1                      // accidentCount 추가
         );
     }
 

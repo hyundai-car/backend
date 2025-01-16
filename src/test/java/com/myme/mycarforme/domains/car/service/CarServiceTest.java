@@ -13,6 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -37,16 +41,19 @@ class CarServiceTest {
     @Test
     void searchCars_withNoCondition_returnAllCars() { // 검색 조건에 아무것도 없을 때
         // given
+        Pageable pageable = PageRequest.of(0, 10);
         List<Car> cars = createSampleCars();
+        Page<Car> carPage = new PageImpl<>(cars, pageable, cars.size());
+
         given(carRepository.findAllBySearchCondition(
-                null, null, null, null, null, null, null, null, null
-        )).willReturn(cars);
+                null, null, null, null, null, null, null, null, null, pageable
+        )).willReturn(carPage);
 
         // when
         CarSearchRequest request = new CarSearchRequest(
                 null, null, null, null, null, null, null, null, null
         );
-        List<CarDto> result = carService.searchCars(request);
+        Page<CarDto> result = carService.searchCars(request, "userId", pageable);
 
         // then
         assertThat(result).hasSize(5);
@@ -65,19 +72,33 @@ class CarServiceTest {
         String keyword = "아반떼";
         List<Car> cars = List.of(
                 createCar("아반떼 N", "세단", "가솔린"));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Car> carPage = new PageImpl<>(cars, pageable, cars.size());
 
-        given(carRepository.findAllBySearchCondition(keyword, null, null, null, null, null, null, null, null)).willReturn(cars);
+        given(carRepository.findAllBySearchCondition(
+                keyword,    // keyword
+                null,       // carType
+                null,       // fuelType
+                null,       // minSellingPrice
+                null,       // maxSellingPrice
+                null,       // minMileage
+                null,       // maxMileage
+                null,       // minYear
+                null,       // maxYear
+                pageable    // pageable 추가
+        )).willReturn(carPage);
 
         // when
-        CarSearchRequest request = new CarSearchRequest(keyword, null, null, null, null, null, null,null,null);
-        List<CarDto> result = carService.searchCars(request);
+        CarSearchRequest request = new CarSearchRequest(
+                keyword, null, null, null, null, null, null, null, null);
+        Page<CarDto> result = carService.searchCars(request, "userId", pageable);
 
         // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).carName()).contains("아반떼");
-        //assertThat(result.get(0).carId()).isNotNull();
-        assertThat(result.get(0).carNumber()).isNotNull();
-        assertThat(result.get(0).mainImage()).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).carName()).contains("아반떼");
+        //assertThat(result.getContent().get(0).carId()).isNotNull();
+        assertThat(result.getContent().get(0).carNumber()).isNotNull();
+        assertThat(result.getContent().get(0).mainImage()).isNotNull();
     }
 
     @Test
