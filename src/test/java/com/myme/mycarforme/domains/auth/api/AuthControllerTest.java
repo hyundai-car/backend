@@ -69,10 +69,10 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token.access_token").value(tokenDto.accessToken()))
-                .andExpect(jsonPath("$.token.refresh_token").value(tokenDto.refreshToken()))
+                .andExpect(jsonPath("$.token.accessToken").value(tokenDto.accessToken()))
+                .andExpect(jsonPath("$.token.refreshToken").value(tokenDto.refreshToken()))
                 .andExpect(jsonPath("$.userInfo.email").value(userInfoDto.email()))
-                .andExpect(jsonPath("$.userInfo.given_name").value(userInfoDto.name()));
+                .andExpect(jsonPath("$.userInfo.name").value(userInfoDto.name()));
     }
 
     @Test

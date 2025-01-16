@@ -57,7 +57,9 @@ class AuthServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.token().accessToken()).isEqualTo(expectedToken.accessToken());
         assertThat(result.token().refreshToken()).isEqualTo(expectedToken.refreshToken());
-        assertThat(result.userInfo()).isEqualTo(expectedUser);
+        assertThat(result.userInfo())
+                        .extracting("email", "name", "phoneNumber")
+                        .containsExactly(expectedUser.email(), expectedUser.name(), expectedUser.phoneNumber());
         verify(keycloakClient).getToken(authorizationCode, codeVerifier);
     }
 
