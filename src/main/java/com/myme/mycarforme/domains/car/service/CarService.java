@@ -9,10 +9,13 @@ import com.myme.mycarforme.domains.car.dto.*;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.exception.ImageNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
+import com.myme.mycarforme.domains.car.repository.LikeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,9 +28,10 @@ import java.util.stream.Collectors;
 
 public class CarService {
     private final CarRepository carRepository;
+    private final LikeRepository likeRepository;
 
-    public List<CarDto> searchCars(CarSearchRequest request) {
-        List<Car> cars = carRepository.findAllBySearchCondition(
+    public Page<CarDto> searchCars(CarSearchRequest request, String userId, Pageable pageable) {
+        Page<Car> carPage = carRepository.findAllBySearchCondition(
                 request.keyword(),
                 request.carType(),
                 request.fuelType(),
@@ -36,12 +40,15 @@ public class CarService {
                 request.minMileage(),
                 request.maxMileage(),
                 request.minYear(),
-                request.maxYear()
+                request.maxYear(),
+                pageable
         );
 
-        return cars.stream()
-                .map(car -> CarDto.of(car, false, 0L)) // 현재는 찜 기능이 구현되지 않아 false, 0으로 처리
-                .collect(Collectors.toList());
+        return carPage.map(car -> {
+            Boolean isLike = likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(car.getId(), userId);
+            Long likeCount = likeRepository.countByCarIdAndIsLikeTrue(car.getId());
+            return CarDto.of(car, isLike, likeCount);
+        });
     }
 
     @Transactional
@@ -81,14 +88,17 @@ public class CarService {
                 .collect(Collectors.toList());
     }
 
-    public MmScoreResponse getTop5CarsByMmScore() {
+    public MmScoreResponse getTop5CarsByMmScore(String userId) {
         List<Car> top5Cars = carRepository.findTop5ByOrderByMmScoreDesc();
         List<MmScoreDto> mmScoreDtos = top5Cars.stream()
-                .map(car -> MmScoreDto.of( car, false, 0L))
-                .toList();
+                .map(car ->  {Boolean isLike = likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(car.getId(), userId);
+        Long likeCount = likeRepository.countByCarIdAndIsLikeTrue(car.getId());
+        return MmScoreDto.of(car, isLike, likeCount);}).toList();
 
         return MmScoreResponse.from(mmScoreDtos);
     }
+
+
 
 
 
