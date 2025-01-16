@@ -20,9 +20,8 @@ public class Car extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "buyer_id")
-//    private User buyer;
+    @Column(unique = true)
+    private String buyer_id;
 
     private String carName;
     private String carType;
@@ -59,7 +58,7 @@ public class Car extends BaseTimeEntity {
     private LocalDateTime deliveryEndedAt;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
-    private List<AccidentHistory> accidentHistories = new ArrayList<>();;
+    private List<AccidentHistory> accidentHistoryList = new ArrayList<>();;
 
     @OneToOne(mappedBy = "car", cascade = CascadeType.ALL)
     private OptionList optionList;
@@ -74,10 +73,10 @@ public class Car extends BaseTimeEntity {
 //    private List<Recommend> recommendList;
 //
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
-    private List<Exterior360Image> exterior360Images;
+    private List<Exterior360Image> exterior360ImageList;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
-    private List<DetailImage> detailImages;
+    private List<DetailImage> detailImageList;
 
     @Builder
     private Car(Long id, String carName, String carType, Long year, String initialRegistration,

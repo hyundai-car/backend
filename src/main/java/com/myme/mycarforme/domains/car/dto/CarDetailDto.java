@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record CarDetailDto(Long carId,
-                           String modelName,
-                           String year,
+                           String carName,
+                           Long year,
                            Long mileage,
                            Long sellingPrice,
                            String exteriorColor,
@@ -20,16 +20,17 @@ public record CarDetailDto(Long carId,
                            String mainImage,
                            Long newCarPrice,
                            String carNumber,
+                           Long seating,
                            String createdAt,
                            String updatedAt,
                            OptionListDto optionLists,
-                           List<AccidentHistoryDto> accidentHistories) {
+                           List<AccidentHistoryDto> accidentHistoryList) {
 
     public static CarDetailDto from(Car car) {
         return new CarDetailDto(
                 car.getId(),
                 car.getCarName(),
-                car.getYear().toString(),
+                car.getYear(),
                 car.getMileage(),
                 car.getSellingPrice(),
                 car.getExteriorColor(),
@@ -42,10 +43,11 @@ public record CarDetailDto(Long carId,
                 car.getMainImage(),
                 car.getNewCarPrice(),
                 car.getCarNumber(),
+                car.getSeating(),
                 car.getCreatedAt() != null ? car.getCreatedAt().toString() : null,
                 car.getUpdatedAt() != null ? car.getUpdatedAt().toString() : null,
                 car.getOptionList() != null ? OptionListDto.from(car.getOptionList()) : null,
-                car.getAccidentHistories().stream()
+                car.getAccidentHistoryList().stream()
                         .map(AccidentHistoryDto::from)
                         .collect(Collectors.toList())
         );

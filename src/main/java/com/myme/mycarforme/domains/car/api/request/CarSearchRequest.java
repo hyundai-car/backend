@@ -6,13 +6,13 @@ import java.util.List;
 public record CarSearchRequest(String keyword, List<String> carType, List<String> fuelType,
                                Long minSellingPrice, Long maxSellingPrice,
                                Long minMileage, Long maxMileage,
-                               String minYear, String maxYear) {
+                               Long minYear, Long maxYear) {
 
     public static CarSearchRequest of(
             String keyword, List<String> carType, List<String> fuelType,
             Long minSellingPrice, Long maxSellingPrice,
             Long minMileage, Long maxMileage,
-            String minYear, String maxYear) {
+            Long minYear, Long maxYear) {
         return new CarSearchRequest(
                 keyword, carType, fuelType,
                 minSellingPrice, maxSellingPrice,
@@ -29,8 +29,8 @@ public record CarSearchRequest(String keyword, List<String> carType, List<String
             Long maxSellingPrice,
             Long minMileage,
             Long maxMileage,
-            String minYear,
-            String maxYear) {
+            Long minYear,
+            Long maxYear) {
         return new CarSearchRequest(
                 keyword,
                 carType != null ? List.of(carType) : null,     // 단일 값을 리스트로 변환
