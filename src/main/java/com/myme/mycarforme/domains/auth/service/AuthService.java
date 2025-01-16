@@ -19,7 +19,7 @@ public class AuthService {
 
         KeycloakUserInfoDto user = keycloakClient.getUserInfo(token.accessToken());
 
-        return LoginResponse.of(token, user);
+        return LoginResponse.from(token, user);
     }
 
     public ReissueResponse reissue(String refreshToken) {
