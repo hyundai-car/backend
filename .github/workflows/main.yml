@@ -36,6 +36,7 @@ jobs:
             DB_URL=${{ secrets.DB_URL }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            MCFM_KEYCLOAK_SECRET=${{ secrets.MCFM_KEYCLOAK_SECRET }}
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master

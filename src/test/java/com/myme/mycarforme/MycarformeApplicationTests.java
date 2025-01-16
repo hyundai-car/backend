@@ -1,12 +1,8 @@
 package com.myme.mycarforme;
 
-import com.myme.mycarforme.domains.auth.api.AuthController;
 import com.myme.mycarforme.domains.auth.client.KeycloakClient;
-import com.myme.mycarforme.domains.auth.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
