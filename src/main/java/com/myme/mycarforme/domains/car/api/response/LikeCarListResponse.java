@@ -1,6 +1,6 @@
 package com.myme.mycarforme.domains.car.api.response;
 
-import com.myme.mycarforme.domains.car.domain.Car;
+import com.myme.mycarforme.domains.car.domain.Like;
 import com.myme.mycarforme.domains.car.dto.LikeCarDto;
 import org.springframework.data.domain.Page;
 
@@ -15,10 +15,10 @@ public record LikeCarListResponse(
         boolean isFirst,
         boolean isLast
 ) {
-    public static LikeCarListResponse from(Page<Car> page) {
+    public static LikeCarListResponse from(Page<Like> page) {
         List<LikeCarDto> likeCarDtos = page.getContent()
                 .stream()
-                .map(LikeCarDto::from)
+                .map(like -> LikeCarDto.from(like, like.getCar()))
                 .toList();
 
         return new LikeCarListResponse(

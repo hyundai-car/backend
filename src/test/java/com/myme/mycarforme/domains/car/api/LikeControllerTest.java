@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myme.mycarforme.domains.car.api.response.LikeCarListResponse;
 import com.myme.mycarforme.domains.car.api.response.LikeResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
+import com.myme.mycarforme.domains.car.domain.Like;
 import com.myme.mycarforme.domains.car.domain.OptionList;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.service.LikeService;
@@ -15,17 +16,16 @@ import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.data.web.SortHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.mockStatic;
@@ -48,6 +48,9 @@ class LikeControllerTest {
 
     private final String TEST_USER_ID = "test-user-id";
     private final Long TEST_CAR_ID = 1L;
+
+    private final String TEST_CREATED_AT = "test-created-at";
+    private final String TEST_UPDATED_AT = "test-updated-at";
 
     private Car TEST_CAR;
 
@@ -86,12 +89,16 @@ class LikeControllerTest {
                 .paymentDeliveryStatus(0)
                 .optionList(OptionList.builder().build())
                 .build();
+
+        LocalDateTime now = LocalDateTime.now();
+        ReflectionTestUtils.setField(TEST_CAR, "createdAt", now);
+        ReflectionTestUtils.setField(TEST_CAR, "updatedAt", now);
     }
 
     @Test
     void toggleLike_withValidCarId_thenSuccess() throws Exception {
         // Given
-        LikeResponse likeResponse = new LikeResponse(TEST_CAR_ID, true);
+        LikeResponse likeResponse = new LikeResponse(TEST_CAR_ID, true, TEST_CREATED_AT, TEST_UPDATED_AT);
 
         try (MockedStatic<SecurityUtil> mockedStatic = mockStatic(SecurityUtil.class)) {
             mockedStatic.when(SecurityUtil::getUserId).thenReturn(TEST_USER_ID);
@@ -127,7 +134,7 @@ class LikeControllerTest {
     @Test
     void getLikeByCarId_withValidCarId_thenSuccess() throws Exception {
         // Given
-        LikeResponse likeResponse = new LikeResponse(TEST_CAR_ID, true);
+        LikeResponse likeResponse = new LikeResponse(TEST_CAR_ID, true, TEST_CREATED_AT, TEST_UPDATED_AT);
 
         try (MockedStatic<SecurityUtil> mockedStatic = mockStatic(SecurityUtil.class)) {
             mockedStatic.when(SecurityUtil::getUserId).thenReturn(TEST_USER_ID);
@@ -174,7 +181,17 @@ class LikeControllerTest {
                     Sort.by(Sort.Direction.DESC, "createdAt")
             );
 
-            PageImpl<Car> carPage = new PageImpl<>(List.of(TEST_CAR), pageable, 1);
+            Like like = Like.builder()
+                    .car(TEST_CAR)
+                    .userId(TEST_USER_ID)
+                    .isLike(true)
+                    .build();
+
+            LocalDateTime now = LocalDateTime.now();
+            ReflectionTestUtils.setField(like, "createdAt", now);
+            ReflectionTestUtils.setField(like, "updatedAt", now);
+
+            PageImpl<Like> carPage = new PageImpl<>(List.of(like), pageable, 1);
             LikeCarListResponse likeCarListResponse = LikeCarListResponse.from(carPage);
 
             mockedStatic.when(SecurityUtil::getUserId).thenReturn(TEST_USER_ID);

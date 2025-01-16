@@ -45,24 +45,24 @@ class LikeRepositoryTest {
         likeRepository.save(like);
 
         // when
-        Page<Car> cars = likeRepository.findCarsByUserIdAndIsLikeTrue("testUser", pageable);
+        Page<Like> likeCarList = likeRepository.findCarsByUserIdAndIsLikeTrue("testUser", pageable);
 
         // then
-        assertThat(cars.getContent())
+        assertThat(likeCarList.getContent())
                 .isNotEmpty()
                 .hasSize(1);
 
-        Car resultCar = cars.getContent().get(0);
+        Car resultCar = likeCarList.getContent().get(0).getCar();
         assertThat(resultCar.getCarName()).isEqualTo("Test car");
     }
 
     @Test
     void findCarsByUserIdAndIsLikeTrue_whenDataEmpty_thenReturnEmpty() {
         // when
-        Page<Car> cars = likeRepository.findCarsByUserIdAndIsLikeTrue("nonexistentUser", pageable);
+        Page<Like> likeCarList = likeRepository.findCarsByUserIdAndIsLikeTrue("nonexistentUser", pageable);
 
         // then
-        assertThat(cars.getContent()).isEmpty();
+        assertThat(likeCarList.getContent()).isEmpty();
     }
 
     @Test
@@ -81,9 +81,9 @@ class LikeRepositoryTest {
         likeRepository.save(like);  // Like 엔티티 저장 추가
 
         // when
-        Page<Car> cars = likeRepository.findCarsByUserIdAndIsLikeTrue("testUser", pageable);
+        Page<Like> likeCarList = likeRepository.findCarsByUserIdAndIsLikeTrue("testUser", pageable);
 
         // then
-        assertThat(cars.getContent()).isEmpty();
+        assertThat(likeCarList.getContent()).isEmpty();
     }
 }

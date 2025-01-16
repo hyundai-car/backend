@@ -18,7 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +43,9 @@ class LikeServiceTest {
     private final Long TEST_CAR_ID = 1L;
 
     private Car TEST_CAR;
+
+    private Like TEST_LIKE_TRUE;
+    private Like TEST_LIKE_FALSE;
 
     @BeforeEach
     void setUp() {
@@ -75,21 +80,33 @@ class LikeServiceTest {
                 .paymentDeliveryStatus(0)
                 .optionList(OptionList.builder().build())
                 .build();
+
+        TEST_LIKE_TRUE = Like.builder()
+                .car(TEST_CAR)
+                .userId(TEST_USER_ID)
+                .isLike(true)
+                .build();
+
+        TEST_LIKE_FALSE = Like.builder()
+                .car(TEST_CAR)
+                .userId(TEST_USER_ID)
+                .isLike(false)
+                .build();
+
+        LocalDateTime now = LocalDateTime.now();
+        ReflectionTestUtils.setField(TEST_LIKE_TRUE, "createdAt", now);
+        ReflectionTestUtils.setField(TEST_LIKE_TRUE, "updatedAt", now);
+
+        ReflectionTestUtils.setField(TEST_LIKE_FALSE, "createdAt", now);
+        ReflectionTestUtils.setField(TEST_LIKE_FALSE, "updatedAt", now);
     }
 
     @Test
     void toggleLike_whenValidCar_thenReturnTrue() {
         // Given
-        Like newLike = Like.builder()
-                .id(1L)
-                .userId(TEST_USER_ID)
-                .car(TEST_CAR)
-                .isLike(true)
-                .build();
-
         when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
         when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.empty());
-        when(likeRepository.save(any(Like.class))).thenReturn(newLike);
+        when(likeRepository.save(any(Like.class))).thenReturn(TEST_LIKE_TRUE);
 
         // When
         LikeResponse result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
@@ -123,15 +140,9 @@ class LikeServiceTest {
     @Test
     void toggleLike_whenCarExistAndIsLikeTrue_thenReturnFalse() {
         // Given
-        Like existingLike = Like.builder()
-                .id(1L)
-                .userId(TEST_USER_ID)
-                .car(TEST_CAR)
-                .isLike(true)
-                .build();
-
         when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
-        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(TEST_LIKE_TRUE));
+        when(likeRepository.save(any(Like.class))).thenReturn(TEST_LIKE_FALSE);
 
         // When
         LikeResponse result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
@@ -145,15 +156,9 @@ class LikeServiceTest {
     @Test
     void toggleLike_whenCarExistAndIsLikeFalse_thenReturnTrue() {
         // Given
-        Like existingLike = Like.builder()
-                .id(1L)
-                .userId(TEST_USER_ID)
-                .car(TEST_CAR)
-                .isLike(false)
-                .build();
-
         when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
-        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(TEST_LIKE_FALSE));
+        when(likeRepository.save(any(Like.class))).thenReturn(TEST_LIKE_TRUE);
 
         // When
         LikeResponse result = likeService.toggleLike(TEST_USER_ID, TEST_CAR_ID);
@@ -167,15 +172,8 @@ class LikeServiceTest {
     @Test
     void getLikeByCarId_whenCarExistAndLikeIsTrue_thenReturnLike() {
         // Given
-        Like existingLike = Like.builder()
-                .id(1L)
-                .userId(TEST_USER_ID)
-                .car(TEST_CAR)
-                .isLike(true)
-                .build();
-
         when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
-        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(TEST_LIKE_TRUE));
 
         // When
         LikeResponse result = likeService.getLikeByCarId(TEST_USER_ID, TEST_CAR_ID);
@@ -188,15 +186,8 @@ class LikeServiceTest {
     @Test
     void getLikeByCarId_whenCarExistAndLikeIsFalse_thenReturnLike() {
         // Given
-        Like existingLike = Like.builder()
-                .id(1L)
-                .userId(TEST_USER_ID)
-                .car(TEST_CAR)
-                .isLike(false)
-                .build();
-
         when(carRepository.findById(TEST_CAR_ID)).thenReturn(Optional.of(TEST_CAR));
-        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(existingLike));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, TEST_CAR_ID)).thenReturn(Optional.of(TEST_LIKE_FALSE));
 
         // When
         LikeResponse result = likeService.getLikeByCarId(TEST_USER_ID, TEST_CAR_ID);
@@ -244,8 +235,19 @@ class LikeServiceTest {
                 .initialRegistration("2020.12.01")
                 .build();
 
-        List<Car> cars = List.of(car);
-        PageImpl<Car> carPage = new PageImpl<>(cars);
+        Like like = Like.builder()
+                .id(1L)
+                .userId(TEST_USER_ID)
+                .car(car)
+                .isLike(true)
+                .build();
+
+        LocalDateTime now = LocalDateTime.now();
+        ReflectionTestUtils.setField(like, "createdAt", now);
+        ReflectionTestUtils.setField(like, "updatedAt", now);
+
+        List<Like> likeCarList = List.of(like);
+        PageImpl<Like> carPage = new PageImpl<>(likeCarList);
 
         when(likeRepository.findCarsByUserIdAndIsLikeTrue(eq(TEST_USER_ID), any(Pageable.class)))
                 .thenReturn(carPage);
