@@ -1,13 +1,11 @@
 package com.myme.mycarforme.domains.car.service;
 
 import com.myme.mycarforme.domains.car.api.request.CarSearchRequest;
+import com.myme.mycarforme.domains.car.api.response.MmScoreResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.DetailImage;
 import com.myme.mycarforme.domains.car.domain.Exterior360Image;
-import com.myme.mycarforme.domains.car.dto.CarDetailDto;
-import com.myme.mycarforme.domains.car.dto.CarDto;
-import com.myme.mycarforme.domains.car.dto.DetailImageDto;
-import com.myme.mycarforme.domains.car.dto.Exterior360ImageDto;
+import com.myme.mycarforme.domains.car.dto.*;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.exception.ImageNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
@@ -42,7 +40,7 @@ public class CarService {
         );
 
         return cars.stream()
-                .map(car -> CarDto.of(car, false, 0)) // 현재는 찜 기능이 구현되지 않아 false, 0으로 처리
+                .map(car -> CarDto.of(car, false, 0L)) // 현재는 찜 기능이 구현되지 않아 false, 0으로 처리
                 .collect(Collectors.toList());
     }
 
@@ -83,6 +81,14 @@ public class CarService {
                 .collect(Collectors.toList());
     }
 
+    public MmScoreResponse getTop5CarsByMmScore() {
+        List<Car> top5Cars = carRepository.findTop5ByOrderByMmScoreDesc();
+        List<MmScoreDto> mmScoreDtos = top5Cars.stream()
+                .map(car -> MmScoreDto.of( car, false, 0L))
+                .toList();
+
+        return MmScoreResponse.from(mmScoreDtos);
+    }
 
 
 

@@ -1,13 +1,11 @@
 package com.myme.mycarforme.domains.car.api;
 
 import com.myme.mycarforme.domains.car.api.request.CarSearchRequest;
-import com.myme.mycarforme.domains.car.api.response.CarDetailResponse;
-import com.myme.mycarforme.domains.car.api.response.CarListResponse;
-import com.myme.mycarforme.domains.car.api.response.DetailImageResponse;
-import com.myme.mycarforme.domains.car.api.response.Exterior360ImageResponse;
+import com.myme.mycarforme.domains.car.api.response.*;
 import com.myme.mycarforme.domains.car.dto.CarDetailDto;
 import com.myme.mycarforme.domains.car.dto.DetailImageDto;
 import com.myme.mycarforme.domains.car.dto.Exterior360ImageDto;
+import com.myme.mycarforme.domains.car.dto.MmScoreDto;
 import com.myme.mycarforme.domains.car.service.CarService;
 import com.myme.mycarforme.global.common.response.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +46,11 @@ public class CarController {
         return CommonResponse.from(DetailImageResponse.from(images));
     }
 
+    @GetMapping("/mmscores")
+    public CommonResponse<MmScoreResponse> getMmscores() {
+        MmScoreResponse response = carService.getTop5CarsByMmScore();
+        return CommonResponse.from(response);
+    }
 
 
 

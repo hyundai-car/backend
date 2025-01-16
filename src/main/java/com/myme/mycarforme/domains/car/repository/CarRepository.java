@@ -31,8 +31,8 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
             @Param("maxSellingPrice") Long maxSellingPrice,
             @Param("minMileage") Long minMileage,
             @Param("maxMileage") Long maxMileage,
-            @Param("minYear") String minYear,
-            @Param("maxYear") String maxYear
+            @Param("minYear") Long minYear,
+            @Param("maxYear") Long maxYear
     );
 
     @Query("SELECT c FROM Car c " +
@@ -47,6 +47,9 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
 
     @Query("SELECT d FROM DetailImage d WHERE d.car.id = :carId")
     List<DetailImage> findAllDetailImagesByCarId(@Param("carId") Long carId);
+
+    @Query("SELECT c FROM Car c ORDER BY c.mmScore DESC LIMIT 5")
+    List<Car> findTop5ByOrderByMmScoreDesc();
 
 
 
