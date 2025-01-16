@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,6 +29,8 @@ class SwaggerConfig {
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
 
         return new OpenAPI()
+                .addServersItem(new Server().url("https://mycarf0r.me").description("Production"))
+                .addServersItem(new Server().url("http://localhost:8080").description("Local"))
                 .info(info)
                 .addSecurityItem(securityRequirement)
                 .components(new Components().addSecuritySchemes("bearerAuth", securityScheme));
