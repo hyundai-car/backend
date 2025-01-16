@@ -31,11 +31,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/review-backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest
           build-args: |
             DB_URL=${{ secrets.DB_URL }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            MCFM_KEYCLOAK_SECRET=${{ secrets.MCFM_KEYCLOAK_SECRET }}
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -49,13 +50,13 @@ jobs:
             docker rm backend-container || true
             
             # 기존 이미지 삭제
-            docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/review-backend:latest || true
+            docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest || true
 
             # 최신 이미지 pull
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/review-backend:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest
             
             # 새 컨테이너 실행
             docker run -d \
               --name backend-container \
               -p 8080:8080 \
-              ${{ secrets.DOCKERHUB_USERNAME }}/review-backend:latest
+              ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest

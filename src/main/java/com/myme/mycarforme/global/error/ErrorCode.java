@@ -15,11 +15,20 @@ public enum ErrorCode {
     ROUTE_NOT_FOUND(404, "C004", "요청 경로를 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR(500, "C006", "서버 에러."),
 
+    // Auth
+    INVALID_TOKEN(401, "A001", "유효하지 않은 토큰입니다."),
+    EXPIRED_TOKEN(401, "A002", "만료된 토큰입니다."),
+    INVALID_GRANT(400, "A003", "유효하지 않은 인증 정보입니다."),
+    KEYCLOAK_SERVER_ERROR(500, "A004", "인증 서버 에러가 발생했습니다."),
+
     // User
     USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
-    DUPLICATE_USER(409, "U002", "유저가 이미 존재합니다.");
+    DUPLICATE_USER(409, "U002", "유저가 이미 존재합니다."),
 
     // Car
+    CAR_NOT_FOUND(404, "R001", "차량을 찾을 수 없습니다."),
+    IMAGE_NOT_FOUND(404,"R002","이미지를 찾을 수 없습니다.");
+
 
     // ...
 
