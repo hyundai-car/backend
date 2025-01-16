@@ -1,11 +1,9 @@
 package com.myme.mycarforme.domains.car.service;
 
 import com.myme.mycarforme.domains.car.api.request.CarSearchRequest;
+import com.myme.mycarforme.domains.car.api.response.MmScoreResponse;
 import com.myme.mycarforme.domains.car.domain.*;
-import com.myme.mycarforme.domains.car.dto.CarDetailDto;
-import com.myme.mycarforme.domains.car.dto.CarDto;
-import com.myme.mycarforme.domains.car.dto.DetailImageDto;
-import com.myme.mycarforme.domains.car.dto.Exterior360ImageDto;
+import com.myme.mycarforme.domains.car.dto.*;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.exception.ImageNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
@@ -25,6 +23,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CarServiceTest {
@@ -52,7 +51,7 @@ class CarServiceTest {
         // then
         assertThat(result).hasSize(5);
         assertThat(result).allSatisfy(car -> {
-            assertThat(car.modelName()).isNotNull();
+            assertThat(car.carName()).isNotNull();
             assertThat(car.carNumber()).isNotNull();
             assertThat(car.mainImage()).isNotNull();
 //            assertThat(car.createdAt()).isNotNull();
@@ -75,7 +74,7 @@ class CarServiceTest {
 
         // then
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).modelName()).contains("아반떼");
+        assertThat(result.get(0).carName()).contains("아반떼");
         //assertThat(result.get(0).carId()).isNotNull();
         assertThat(result.get(0).carNumber()).isNotNull();
         assertThat(result.get(0).mainImage()).isNotNull();
@@ -103,7 +102,7 @@ class CarServiceTest {
         // then
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(car ->
-                car.modelName().contains("아반떼") || car.modelName().contains("소나타")
+                car.carName().contains("아반떼") || car.carName().contains("소나타")
         );
 
     }
@@ -139,8 +138,8 @@ class CarServiceTest {
         Long maxPrice = 3000L;
         Long minMileage = 5000L;
         Long maxMileage = 20000L;
-        String minYear = "2020";
-        String maxYear = "2023";
+        Long minYear = 2020L;
+        Long maxYear = 2023L;
 
         List<Car> cars = List.of(
                 Car.builder()
@@ -185,7 +184,7 @@ class CarServiceTest {
         // then
         assertThat(result).hasSize(2);
         assertThat(result).allSatisfy(car -> {
-            assertThat(car.modelName()).contains(keyword);
+            assertThat(car.carName()).contains(keyword);
             assertThat(car.sellingPrice()).isBetween(minPrice, maxPrice);
             assertThat(car.mileage()).isBetween(minMileage, maxMileage);
             assertThat(car.year()).isBetween(minYear, maxYear);
@@ -193,7 +192,7 @@ class CarServiceTest {
 
         // 구체적인 결과 검증
         assertThat(result).anySatisfy(car -> {
-            assertThat(car.modelName()).isEqualTo("아반떼 CN7");
+            assertThat(car.carName()).isEqualTo("아반떼 CN7");
             assertThat(car.carNumber()).isEqualTo("12가3456");
             assertThat(car.mainImage()).isEqualTo("image1.jpg");
         });
@@ -329,8 +328,8 @@ class CarServiceTest {
         // then
         assertThat(result).satisfies(detail -> {
             // Car 기본 정보 검증
-            assertThat(detail.modelName()).isEqualTo("아반떼 CN7");
-            assertThat(detail.year()).isEqualTo("2022");
+            assertThat(detail.carName()).isEqualTo("아반떼 CN7");
+            assertThat(detail.year()).isEqualTo(2022L);
             assertThat(detail.mileage()).isEqualTo(10000L);
             assertThat(detail.sellingPrice()).isEqualTo(2500L);
             assertThat(detail.exteriorColor()).isEqualTo("검정");
@@ -576,6 +575,191 @@ class CarServiceTest {
         }
         return images;
     }
+
+    // 가성비 점수순
+    @Test
+    void getCarList_orderByMmScoreDesc_returnTopFiveCars() { // mmScore 상위 5개 차량
+        // given
+        LocalDateTime now = LocalDateTime.now();
+
+
+        List<Car> mockCars = List.of(
+                Car.builder()
+                        .carName("제네시스 G80")
+                        .year(2023L)
+                        .mileage(1000L)
+                        .sellingPrice(50000000L)
+                        .mainImage("genesis_g80.jpg")
+                        .mmScore(98.5)
+                        .contractedAt(now)
+                        .build(),
+                Car.builder()
+                        .carName("그랜저 하이브리드")
+                        .year(2022L)
+                        .mileage(5000L)
+                        .sellingPrice(45000000L)
+                        .mainImage("grandeur.jpg")
+                        .mmScore(95.0)
+                        .contractedAt(now)
+                        .build(),
+                Car.builder()
+                        .carName("벤츠 E클래스")
+                        .year(2023L)
+                        .mileage(3000L)
+                        .sellingPrice(70000000L)
+                        .mainImage("benz_e.jpg")
+                        .mmScore(92.5)
+                        .contractedAt(now)
+                        .build(),
+                Car.builder()
+                        .carName("BMW 5시리즈")
+                        .year(2022L)
+                        .mileage(8000L)
+                        .sellingPrice(65000000L)
+                        .mainImage("bmw_5.jpg")
+                        .mmScore(90.0)
+                        .contractedAt(now)
+                        .build(),
+                Car.builder()
+                        .carName("아우디 A6")
+                        .year(2023L)
+                        .mileage(2000L)
+                        .sellingPrice(68000000L)
+                        .mainImage("audi_a6.jpg")
+                        .mmScore(88.5)
+                        .contractedAt(now)
+                        .build()
+        );
+
+        given(carRepository.findTop5ByOrderByMmScoreDesc()).willReturn(mockCars);
+
+        // when
+        MmScoreResponse response = carService.getTop5CarsByMmScore();
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.contents()).hasSize(5);
+
+        // 첫 번째 차량 검증
+        MmScoreDto firstCar = response.contents().get(0);
+        assertThat(firstCar.carName()).isEqualTo("제네시스 G80");
+        assertThat(firstCar.year()).isEqualTo(2023L);
+        assertThat(firstCar.mileage()).isEqualTo(1000L);
+        assertThat(firstCar.sellingPrice()).isEqualTo(50000000L);
+        assertThat(firstCar.mainImage()).isEqualTo("genesis_g80.jpg");
+        assertThat(firstCar.mmScore()).isEqualTo(98.5);
+
+        // mmScore 내림차순 정렬 검증
+        List<Double> mmScores = response.contents().stream()
+                .map(MmScoreDto::mmScore)
+                .toList();
+        assertThat(mmScores)
+                .isSortedAccordingTo((a, b) -> Double.compare(b, a)); // 내림차순 검증
+
+        // 각 차량의 필수 필드 존재 여부 검증
+        response.contents().forEach(car -> {
+            //assertThat(car.carId()).isNotNull();
+            assertThat(car.carName()).isNotNull();
+            assertThat(car.year()).isNotNull();
+            assertThat(car.mileage()).isNotNull();
+            assertThat(car.sellingPrice()).isNotNull();
+            assertThat(car.mainImage()).isNotNull();
+            assertThat(car.mmScore()).isNotNull();
+           // assertThat(car.createdAt()).isNotNull();
+           // assertThat(car.updatedAt()).isNotNull();
+        });
+
+        verify(carRepository).findTop5ByOrderByMmScoreDesc();
+    }
+    @Test
+    void getCarList_withLessThanFiveData_returnAllAvailableCars() { // 데이터 5개 미만 (3개로 해보자)
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        List<Car> mockCars = List.of(
+                Car.builder()
+                        .carName("제네시스 G80")
+                        .year(2023L)
+                        .mileage(1000L)
+                        .sellingPrice(50000000L)
+                        .mainImage("genesis_g80.jpg")
+                        .mmScore(98.5)
+                        .contractedAt(now)
+                        .build(),
+                Car.builder()
+                        .carName("그랜저 하이브리드")
+                        .year(2022L)
+                        .mileage(5000L)
+                        .sellingPrice(45000000L)
+                        .mainImage("grandeur.jpg")
+                        .mmScore(95.0)
+                        .contractedAt(now)
+                        .build(),
+                Car.builder()
+                        .carName("벤츠 E클래스")
+                        .year(2023L)
+                        .mileage(3000L)
+                        .sellingPrice(70000000L)
+                        .mainImage("benz_e.jpg")
+                        .mmScore(92.5)
+                        .contractedAt(now)
+                        .build()
+        );
+
+        given(carRepository.findTop5ByOrderByMmScoreDesc()).willReturn(mockCars);
+
+        // when
+        MmScoreResponse response = carService.getTop5CarsByMmScore();
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.contents()).hasSize(3); // 3개만 있는지 확인
+
+        // 첫 번째 차량 검증
+        MmScoreDto firstCar = response.contents().get(0);
+        assertThat(firstCar.carName()).isEqualTo("제네시스 G80");
+        assertThat(firstCar.year()).isEqualTo(2023L);
+        assertThat(firstCar.mileage()).isEqualTo(1000L);
+        assertThat(firstCar.sellingPrice()).isEqualTo(50000000L);
+        assertThat(firstCar.mainImage()).isEqualTo("genesis_g80.jpg");
+        assertThat(firstCar.mmScore()).isEqualTo(98.5);
+
+        // mmScore 내림차순 정렬 검증
+        List<Double> mmScores = response.contents().stream()
+                .map(MmScoreDto::mmScore)
+                .toList();
+        assertThat(mmScores)
+                .isSortedAccordingTo((a, b) -> Double.compare(b, a)); // 내림차순 검증
+
+        // 각 차량의 필수 필드 존재 여부 검증
+        response.contents().forEach(car -> {
+            //assertThat(car.carId()).isNotNull();
+            assertThat(car.carName()).isNotNull();
+            assertThat(car.year()).isNotNull();
+            assertThat(car.mileage()).isNotNull();
+            assertThat(car.sellingPrice()).isNotNull();
+            assertThat(car.mainImage()).isNotNull();
+            assertThat(car.mmScore()).isNotNull();
+           // assertThat(car.createdAt()).isNotNull();
+           // assertThat(car.updatedAt()).isNotNull();
+        });
+
+        verify(carRepository).findTop5ByOrderByMmScoreDesc();
+    }
+
+    @Test
+    void getCarList_withNoData_returnEmptyList() { // 데이터가 없으면?? 빈 리스트 반환
+        // given
+        given(carRepository.findTop5ByOrderByMmScoreDesc()).willReturn(List.of());
+
+        // when
+        MmScoreResponse response = carService.getTop5CarsByMmScore();
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.contents()).isEmpty();
+        verify(carRepository).findTop5ByOrderByMmScoreDesc();
+    }
+
 
 
 
