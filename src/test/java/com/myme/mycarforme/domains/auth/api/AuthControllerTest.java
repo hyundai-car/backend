@@ -58,7 +58,7 @@ class AuthControllerTest {
                 "010-1234-5678"
         );
 
-        LoginResponse loginResponse = LoginResponse.of(tokenDto, userInfoDto);
+        LoginResponse loginResponse = LoginResponse.from(tokenDto, userInfoDto);
         LoginRequest loginRequest = new LoginRequest("test_auth_code", "test_code_verifier");
 
         when(authService.login(anyString(), anyString())).thenReturn(loginResponse);
