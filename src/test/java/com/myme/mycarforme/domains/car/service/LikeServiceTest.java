@@ -1,6 +1,7 @@
 package com.myme.mycarforme.domains.car.service;
 
 import com.myme.mycarforme.domains.car.api.response.LikeCarListResponse;
+import com.myme.mycarforme.domains.car.api.response.LikeComparisonResponse;
 import com.myme.mycarforme.domains.car.api.response.LikeResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Like;
@@ -258,11 +259,161 @@ class LikeServiceTest {
         LikeCarListResponse result = likeService.getLikeCarList(TEST_USER_ID, pageable);
 
         // Then
-        assertThat(result.content()).hasSize(1);
-        assertThat(result.content().get(0))
+        assertThat(result.contents()).hasSize(1);
+        assertThat(result.contents().get(0))
                 .extracting("carId", "carName", "mileage", "sellingPrice")
                 .containsExactly(1L, "Test Car", 1000L, 2000L);
 
         verify(likeRepository).findCarsByUserIdAndIsLikeTrue(eq(TEST_USER_ID), any(Pageable.class));
+    }
+
+    @Test
+    void getComparisonLikeCarList_whenValidData_thenReturnComparisonLikeList() {
+        // Given
+        Car car1 = Car.builder()
+                .id(1L)
+                .carName("Test Car 1")
+                .mmScore(75.0)
+                .initialRegistration("2020.12.01")
+                .mileage(1000L)
+                .fuelEfficiency(10.0)
+                .build();
+
+        Car car2 = Car.builder()
+                .id(2L)
+                .carName("Test Car 2")
+                .mmScore(30.0)
+                .initialRegistration("2020.06.01")
+                .mileage(8000L)
+                .fuelEfficiency(11.0)
+                .build();
+
+        ReflectionTestUtils.setField(car1, "accidentHistoryList", List.of());
+        ReflectionTestUtils.setField(car2, "accidentHistoryList", List.of());
+
+        Like like1 = Like.builder()
+                .car(car1)
+                .userId(TEST_USER_ID)
+                .isLike(true)
+                .build();
+        Like like2 = Like.builder()
+                .car(car2)
+                .userId(TEST_USER_ID)
+                .isLike(true)
+                .build();
+
+        List<Long> requestCarIds = List.of(1L, 2L);
+
+        when(carRepository.findAllById(anyList())).thenReturn(List.of(car1, car2));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, 1L)).thenReturn(Optional.of(like1));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, 2L)).thenReturn(Optional.of(like2));
+
+        // When
+        LikeComparisonResponse result = likeService.getComparisonLikeCarList(TEST_USER_ID, requestCarIds);
+
+        // Then
+        assertThat(result.bestCar())
+                .extracting("")
+        assertThat(result.cars())
+                .extracting("id", "carName")
+                .containsExactly(
+                        tuple(1L, "Test Car 1"),
+                        tuple(2L, "Test Car 2")
+                );
+    }
+
+    @Test
+    void getComparisonLikeCarList_whenCarIdNotFound_throwException() {
+        // Given
+        List<Long> requestCarIds = List.of(1L, 999L);
+        Car car1 = Car.builder().id(1L).build();
+
+        when(carRepository.findAllById(anyList())).thenReturn(List.of(car1));
+
+        // When & Then
+        assertThatThrownBy(() -> likeService.getComparisonLikeCarList(TEST_USER_ID, requestCarIds))
+                .isInstanceOf(LikeComparisonError.class)
+                .hasMessageContaining("carNotFound");
+    }
+
+    @Test
+    void getComparisonLikeCarList_whenIsLikeFalse_throwException() {
+        // Given
+        List<Long> requestCarIds = List.of(1L, 2L);
+        Car car1 = Car.builder().id(1L).build();
+        Car car2 = Car.builder().id(2L).build();
+
+        Like like1 = Like.builder()
+                .car(car1)
+                .userId(TEST_USER_ID)
+                .isLike(true)
+                .build();
+        Like like2 = Like.builder()
+                .car(car2)
+                .userId(TEST_USER_ID)
+                .isLike(false)  // false case
+                .build();
+
+        when(carRepository.findAllById(anyList())).thenReturn(List.of(car1, car2));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, 1L)).thenReturn(Optional.of(like1));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, 2L)).thenReturn(Optional.of(like2));
+
+        // When & Then
+        assertThatThrownBy(() -> likeService.getComparisonLikeCarList(TEST_USER_ID, requestCarIds))
+                .isInstanceOf(LikeComparisonError.class)
+                .hasMessageContaining("isLikeFalse");
+    }
+
+    @Test
+    void getComparisonLikeCarList_whenFewerThanTwoCarIds_throwException() {
+        // Given
+        List<Long> requestCarIds = List.of(1L);
+
+        // When & Then
+        assertThatThrownBy(() -> likeService.getComparisonLikeCarList(TEST_USER_ID, requestCarIds))
+                .isInstanceOf(LikeComparisonError.class)
+                .hasMessageContaining("invalidLength");
+    }
+
+    @Test
+    void getComparisonLikeCarList_whenDuplicatedDataWithMoreThanTwoDistinctData_thenReturnComparisonLikeList() {
+        // Given
+        List<Long> requestCarIds = List.of(1L, 2L, 2L, 1L);  // 중복된 ID들
+
+        Car car1 = Car.builder()
+                .id(1L)
+                .carName("Test Car 1")
+                .build();
+        Car car2 = Car.builder()
+                .id(2L)
+                .carName("Test Car 2")
+                .build();
+
+        Like like1 = Like.builder()
+                .car(car1)
+                .userId(TEST_USER_ID)
+                .isLike(true)
+                .build();
+        Like like2 = Like.builder()
+                .car(car2)
+                .userId(TEST_USER_ID)
+                .isLike(true)
+                .build();
+
+        when(carRepository.findAllById(anyList())).thenReturn(List.of(car1, car2));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, 1L)).thenReturn(Optional.of(like1));
+        when(likeRepository.findByUserIdAndCarId(TEST_USER_ID, 2L)).thenReturn(Optional.of(like2));
+
+        // When
+        LikeComparisonResponse result = likeService.getComparisonLikeCarList(TEST_USER_ID, requestCarIds);
+
+        // Then
+        assertThat(result.cars()).hasSize(2);
+        assertThat(result.cars())
+                .extracting("id", "carName")
+                .containsExactly(
+                        tuple(1L, "Test Car 1"),
+                        tuple(2L, "Test Car 2")
+                );
     }
 }
