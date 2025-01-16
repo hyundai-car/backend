@@ -32,11 +32,6 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest
-          build-args: |
-            DB_URL=${{ secrets.DB_URL }}
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            MCFM_KEYCLOAK_SECRET=${{ secrets.MCFM_KEYCLOAK_SECRET }}
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -59,4 +54,8 @@ jobs:
             docker run -d \
               --name backend-container \
               -p 8080:8080 \
-              ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest
+              ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest \
+              -e DB_URL=${{ secrets.DB_URL }} \
+              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e MCFM_KEYCLOAK_SECRET=${{ secrets.MCFM_KEYCLOAK_SECRET }}
