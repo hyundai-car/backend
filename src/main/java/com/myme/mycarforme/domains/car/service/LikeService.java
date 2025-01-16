@@ -1,5 +1,6 @@
 package com.myme.mycarforme.domains.car.service;
 
+import com.myme.mycarforme.domains.car.api.response.LikeCarListResponse;
 import com.myme.mycarforme.domains.car.api.response.LikeResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Like;
@@ -8,6 +9,8 @@ import com.myme.mycarforme.domains.car.repository.CarRepository;
 import com.myme.mycarforme.domains.car.repository.LikeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,5 +52,11 @@ public class LikeService {
                 );
 
         return new LikeResponse(currentCar.getId(), currentLike.getIsLike());
+    }
+
+    public LikeCarListResponse getLikeCarList(String userId, Pageable pageable) {
+        Page<Car> carList = likeRepository.findCarsByUserIdAndIsLikeTrue(userId, pageable);
+
+        return LikeCarListResponse.from(carList);
     }
 }

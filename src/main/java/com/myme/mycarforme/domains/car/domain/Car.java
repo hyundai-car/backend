@@ -26,6 +26,8 @@ public class Car extends BaseTimeEntity {
 
     private String carName;
     private String carType;
+
+    @Column(name = "`year`")
     private Long year;
     private String initialRegistration;
     private Long mileage;
