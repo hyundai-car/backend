@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class CarNotFoundException extends BusinessException {
-    public CarNotFoundException(String message) {
+    public CarNotFoundException() {
         super(ErrorCode.CAR_NOT_FOUND);
     }
 }

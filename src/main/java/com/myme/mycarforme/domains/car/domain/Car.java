@@ -26,6 +26,8 @@ public class Car extends BaseTimeEntity {
 
     private String carName;
     private String carType;
+
+    @Column(name = "`year`")
     private Long year;
     private String initialRegistration;
     private Long mileage;
@@ -61,15 +63,15 @@ public class Car extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "car", cascade = CascadeType.ALL)
     private OptionList optionList;
+
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
+    private List<Like> likeList;
 //
 //    @OneToMany(mappedBy = "car")
-//    private List<Like> likes;
+//    private List<Visit> visitList;
 //
 //    @OneToMany(mappedBy = "car")
-//    private List<Visit> visits;
-//
-//    @OneToMany(mappedBy = "car")
-//    private List<Recommend> recommends;
+//    private List<Recommend> recommendList;
 //
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<Exterior360Image> exterior360Images;
@@ -77,9 +79,8 @@ public class Car extends BaseTimeEntity {
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<DetailImage> detailImages;
 
-
     @Builder
-    private Car(String carName, String carType, Long year, String initialRegistration,
+    private Car(Long id, String carName, String carType, Long year, String initialRegistration,
                 Long mileage, String driveType, Long displacement, Long sellingPrice,
                 String exteriorColor, String interiorColor, Long seating, String fuelType,
                 String transmissionType, Integer isOnSale, String location, Double mmScore,
@@ -88,6 +89,7 @@ public class Car extends BaseTimeEntity {
                 Double cityEfficiency, Double highwayEfficiency, Integer paymentDeliveryStatus,
                 LocalDateTime contractedAt, LocalDateTime payedAt, LocalDateTime deliveryStartedAt,
                 LocalDateTime deliveryEndedAt, OptionList optionList) {
+        this.id = id;
         this.carName = carName;
         this.carType = carType;
         this.year = year;

@@ -10,22 +10,29 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name="detail_images")
-public class DetailImage extends BaseTimeEntity {
+@Table(name = "likes")
+public class Like extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
     private Car car;
 
-    private String imageUrl;
+    private Boolean isLike;
 
     @Builder
-    public DetailImage(Car car, String imageUrl) {
+    public Like(Long id, String userId, Car car, Boolean isLike) {
+        this.id = id;
+        this.userId = userId;
         this.car = car;
-        this.imageUrl = imageUrl;
+        this.isLike = isLike;
+    }
+
+    public void toggleLike() {
+        this.isLike = !this.isLike;
     }
 }
