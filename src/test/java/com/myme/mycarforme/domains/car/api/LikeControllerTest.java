@@ -2,7 +2,10 @@ package com.myme.mycarforme.domains.car.api;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.myme.mycarforme.domains.car.api.response.LikeCarListResponse;
 import com.myme.mycarforme.domains.car.api.response.LikeResponse;
+import com.myme.mycarforme.domains.car.domain.Car;
+import com.myme.mycarforme.domains.car.domain.OptionList;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.service.LikeService;
 import com.myme.mycarforme.global.util.security.SecurityUtil;
@@ -12,14 +15,24 @@ import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.SortHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = LikeController.class)
@@ -36,8 +49,44 @@ class LikeControllerTest {
     private final String TEST_USER_ID = "test-user-id";
     private final Long TEST_CAR_ID = 1L;
 
+    private Car TEST_CAR;
+
     @BeforeEach
-    void setUp() { objectMapper = new ObjectMapper(); }
+    void setUp() {
+        objectMapper = new ObjectMapper();
+
+        TEST_CAR = Car.builder()
+                .id(TEST_CAR_ID) // ID를 포함
+                .carName("Test car")
+                .carType("luxury")
+                .year(2022L)
+                .initialRegistration("2022.04.11")
+                .mileage(31200L)
+                .driveType("Auto")
+                .displacement(1999L)
+                .sellingPrice(4800L)
+                .exteriorColor("color")
+                .interiorColor("color")
+                .seating(5L)
+                .fuelType("gasoline")
+                .transmissionType("2WD")
+                .isOnSale(1)
+                .location("location")
+                .mmScore(90.11)
+                .fuelEfficiency(10.4)
+                .mainImage("https://image")
+                .newCarPrice(6000L)
+                .savingAccount(1200.0)
+                .carNumber("123가1234")
+                .accidentSeverity(0.0)
+                .repairProbability(30.4)
+                .predictedPrice(5000.0)
+                .cityEfficiency(9.8)
+                .highwayEfficiency(11.0)
+                .paymentDeliveryStatus(0)
+                .optionList(OptionList.builder().build())
+                .build();
+    }
 
     @Test
     void toggleLike_withValidCarId_thenSuccess() throws Exception {
@@ -108,6 +157,43 @@ class LikeControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.code").value("R001"));
+        }
+    }
+
+    @Test
+    void getLikeCarList_withValidPageable_thenSuccess() throws Exception {
+        try (MockedStatic<SecurityUtil> mockedStatic = mockStatic(SecurityUtil.class)) {
+            // Given
+            String page = "0";
+            String size = "10";
+            String sort = "createdAt,desc";
+
+            Pageable pageable = PageRequest.of(
+                    Integer.parseInt(page),
+                    Integer.parseInt(size),
+                    Sort.by(Sort.Direction.DESC, "createdAt")
+            );
+
+            PageImpl<Car> carPage = new PageImpl<>(List.of(TEST_CAR), pageable, 1);
+            LikeCarListResponse likeCarListResponse = LikeCarListResponse.from(carPage);
+
+            mockedStatic.when(SecurityUtil::getUserId).thenReturn(TEST_USER_ID);
+            when(likeService.getLikeCarList(TEST_USER_ID, pageable))
+                    .thenReturn(likeCarListResponse);
+
+            // When & Then
+            mockMvc.perform(get("/api/likes")
+                            .param("page", page)
+                            .param("size", size)
+                            .param("sort", sort)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content[0].carId").value(1L))
+                    .andExpect(jsonPath("$.content[0].carName").value("Test car"))
+                    .andExpect(jsonPath("$.pageNumber").value(0))
+                    .andExpect(jsonPath("$.totalElements").value(1))
+                    .andDo(print());
         }
     }
 }

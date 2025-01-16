@@ -1,5 +1,6 @@
 package com.myme.mycarforme.domains.car.service;
 
+import com.myme.mycarforme.domains.car.api.response.LikeCarListResponse;
 import com.myme.mycarforme.domains.car.api.response.LikeResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Like;
@@ -14,7 +15,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -226,5 +231,36 @@ class LikeServiceTest {
                 .isInstanceOf(CarNotFoundException.class);
 
         verify(carRepository).findById(TEST_CAR_ID);
+    }
+
+    @Test
+    void getLikeCarList_whenValidData_thenReturnLikeList() {
+        // Given
+        Car car = Car.builder()
+                .id(1L)
+                .carName("Test Car")
+                .mileage(1000L)
+                .sellingPrice(2000L)
+                .initialRegistration("2020.12.01")
+                .build();
+
+        List<Car> cars = List.of(car);
+        PageImpl<Car> carPage = new PageImpl<>(cars);
+
+        when(likeRepository.findCarsByUserIdAndIsLikeTrue(eq(TEST_USER_ID), any(Pageable.class)))
+                .thenReturn(carPage);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // When
+        LikeCarListResponse result = likeService.getLikeCarList(TEST_USER_ID, pageable);
+
+        // Then
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().get(0))
+                .extracting("carId", "carName", "mileage", "sellingPrice")
+                .containsExactly(1L, "Test Car", 1000L, 2000L);
+
+        verify(likeRepository).findCarsByUserIdAndIsLikeTrue(eq(TEST_USER_ID), any(Pageable.class));
     }
 }
