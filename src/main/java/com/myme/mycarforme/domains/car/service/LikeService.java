@@ -34,9 +34,13 @@ public class LikeService {
 
         currentLike.toggleLike();
 
-        likeRepository.save(currentLike);
+        Like newLike = likeRepository.save(currentLike);
 
-        return new LikeResponse(currentCar.getId(), currentLike.getIsLike());
+        return new LikeResponse(
+                currentCar.getId(),
+                newLike.getIsLike(),
+                newLike.getCreatedAt().toString(),
+                newLike.getUpdatedAt().toString());
     }
 
     public LikeResponse getLikeByCarId(String userId, Long carId) {
@@ -51,12 +55,24 @@ public class LikeService {
                         .build()
                 );
 
-        return new LikeResponse(currentCar.getId(), currentLike.getIsLike());
+        if(currentLike.getCreatedAt() == null) {
+            return new LikeResponse(
+                    currentCar.getId(),
+                    currentLike.getIsLike(),
+                    "null",
+                    "null");
+        } else {
+            return new LikeResponse(
+                    currentCar.getId(),
+                    currentLike.getIsLike(),
+                    currentLike.getCreatedAt().toString(),
+                    currentLike.getUpdatedAt().toString());
+        }
     }
 
     public LikeCarListResponse getLikeCarList(String userId, Pageable pageable) {
-        Page<Car> carList = likeRepository.findCarsByUserIdAndIsLikeTrue(userId, pageable);
+        Page<Like> likeCarList = likeRepository.findCarsByUserIdAndIsLikeTrue(userId, pageable);
 
-        return LikeCarListResponse.from(carList);
+        return LikeCarListResponse.from(likeCarList);
     }
 }

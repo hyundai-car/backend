@@ -13,9 +13,9 @@ import java.util.Optional;
 public interface LikeRepository extends JpaRepository<Like, Long> {
     Optional<Like> findByUserIdAndCarId(String userId, Long carId);
 
-    @Query("SELECT DISTINCT c FROM Car c " +
-            "LEFT JOIN c.likeList l " +
+    @Query("SELECT l FROM Like l " +
+            "JOIN FETCH l.car c " +
             "WHERE l.userId = :userId " +
             "AND l.isLike = true")
-    Page<Car> findCarsByUserIdAndIsLikeTrue(@Param("userId") String userId, Pageable pageable);
+    Page<Like> findCarsByUserIdAndIsLikeTrue(@Param("userId") String userId, Pageable pageable);
 }
