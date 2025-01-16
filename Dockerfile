@@ -1,12 +1,6 @@
 FROM eclipse-temurin:17-jdk-jammy AS builder
 WORKDIR /build
 
-# Build args 정의
-ARG DB_URL
-ARG DB_USERNAME
-ARG DB_PASSWORD
-ARG MCFM_KEYCLOAK_SECRET
-
 COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
