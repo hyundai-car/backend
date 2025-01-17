@@ -2,6 +2,8 @@ package com.myme.mycarforme.domains.car.service;
 
 import com.myme.mycarforme.domains.car.api.request.CarSearchRequest;
 import com.myme.mycarforme.domains.car.api.response.MmScoreResponse;
+import com.myme.mycarforme.domains.car.api.response.PopularityResponse;
+import com.myme.mycarforme.domains.car.api.response.UpComingSoonCarResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.DetailImage;
 import com.myme.mycarforme.domains.car.domain.Exterior360Image;
@@ -88,6 +90,7 @@ public class CarService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public MmScoreResponse getTop5CarsByMmScore(String userId) {
         List<Car> top5Cars = carRepository.findTop5ByOrderByMmScoreDesc();
         List<MmScoreDto> mmScoreDtos = top5Cars.stream()
@@ -97,6 +100,37 @@ public class CarService {
 
         return MmScoreResponse.from(mmScoreDtos);
     }
+
+    @Transactional
+    public PopularityResponse getPopularCars(String userId) {
+        List<Car> popularCars = carRepository.findTop5ByOrderByLikeCountDesc();
+        List<PopularityDto> popularityDtos = popularCars.stream()
+                .map(car -> {
+                    Boolean isLike = likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(car.getId(), userId);
+                    Long likeCount = likeRepository.countByCarIdAndIsLikeTrue(car.getId());
+                    return PopularityDto.of(car, isLike, likeCount);
+                })
+                .collect(Collectors.toList());
+
+        return PopularityResponse.from(popularityDtos);
+    }
+
+    @Transactional
+    public UpComingSoonCarResponse getUpcomingCars(String userId) {
+        List<Car> upcomingCars = carRepository.findTop5UpcomingCarsByOrderByIdDesc();
+        List<UpComingSoonCarDto> upcomingCarDtos = upcomingCars.stream()
+                .map(car -> {
+                    Boolean isLike = likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(car.getId(), userId);
+                    Long likeCount = likeRepository.countByCarIdAndIsLikeTrue(car.getId());
+                    return UpComingSoonCarDto.of(car, isLike, likeCount);
+                })
+                .collect(Collectors.toList());
+
+        return UpComingSoonCarResponse.from(upcomingCarDtos);
+    }
+
+
+
 
 
 
