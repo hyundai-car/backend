@@ -54,7 +54,5 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     @Query("SELECT c FROM Car c ORDER BY c.mmScore DESC LIMIT 5")
     List<Car> findTop5ByOrderByMmScoreDesc();
 
-
-
-
+    List<Car> findByBuyerId(String userId);
 }

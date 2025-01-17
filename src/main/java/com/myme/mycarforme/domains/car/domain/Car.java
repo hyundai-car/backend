@@ -21,7 +21,7 @@ public class Car extends BaseTimeEntity {
     private Long id;
 
     @Column(unique = true)
-    private String buyer_id;
+    private String buyerId;
 
     private String carName;
     private String carType;

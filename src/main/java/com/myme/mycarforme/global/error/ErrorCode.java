@@ -22,10 +22,6 @@ public enum ErrorCode {
     INVALID_GRANT(400, "A003", "유효하지 않은 인증 정보입니다."),
     KEYCLOAK_SERVER_ERROR(500, "A004", "인증 서버 에러가 발생했습니다."),
 
-    // User
-    USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
-    DUPLICATE_USER(409, "U002", "유저가 이미 존재합니다."),
-
     // Car
     CAR_NOT_FOUND(404, "R001", "차량을 찾을 수 없습니다."),
     IMAGE_NOT_FOUND(404,"R002","이미지를 찾을 수 없습니다."),
@@ -33,8 +29,10 @@ public enum ErrorCode {
     // Like
     LIKE_COMPARISON_INVALID_LENGTH(400, "L001", "비교할 차량이 2개 미만입니다."),
     LIKE_COMPARISON_CAR_NOT_FOUND(404, "L002", "비교할 차량을 찾을 수 없습니다."),
-    LIKE_COMPARISON_LIKE_NOT_FOUND(404, "L003", "비교할 차랑이 찜 목록에 없습니다.");
+    LIKE_COMPARISON_LIKE_NOT_FOUND(404, "L003", "비교할 차랑이 찜 목록에 없습니다."),
 
+    // Order
+    ORDER_NOT_FOUND(404, "O001", "주문 정보가 존재하지 않습니다.");
 
     // ...
 
