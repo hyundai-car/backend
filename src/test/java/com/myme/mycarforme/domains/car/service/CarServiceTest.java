@@ -7,6 +7,7 @@ import com.myme.mycarforme.domains.car.dto.*;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.exception.ImageNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
+import com.myme.mycarforme.domains.car.repository.LikeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,8 +27,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 class CarServiceTest {
@@ -37,6 +42,9 @@ class CarServiceTest {
     @Mock
     private CarRepository carRepository;
 
+    @Mock
+    private LikeRepository likeRepository;
+
     // 차 목록 및 검색
     @Test
     void searchCars_withNoCondition_returnAllCars() { // 검색 조건에 아무것도 없을 때
@@ -45,9 +53,9 @@ class CarServiceTest {
         List<Car> cars = createSampleCars();
         Page<Car> carPage = new PageImpl<>(cars, pageable, cars.size());
 
-        given(carRepository.findAllBySearchCondition(
+        when(carRepository.findAllBySearchCondition(
                 null, null, null, null, null, null, null, null, null, pageable
-        )).willReturn(carPage);
+        )).thenReturn(carPage);
 
         // when
         CarSearchRequest request = new CarSearchRequest(
@@ -75,7 +83,7 @@ class CarServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Car> carPage = new PageImpl<>(cars, pageable, cars.size());
 
-        given(carRepository.findAllBySearchCondition(
+        when(carRepository.findAllBySearchCondition(
                 keyword,    // keyword
                 null,       // carType
                 null,       // fuelType
@@ -86,7 +94,7 @@ class CarServiceTest {
                 null,       // minYear
                 null,       // maxYear
                 pageable    // pageable 추가
-        )).willReturn(carPage);
+        )).thenReturn(carPage);
 
         // when
         CarSearchRequest request = new CarSearchRequest(
@@ -110,19 +118,32 @@ class CarServiceTest {
                 createCar("아반떼", carType, fuelType),
                 createCar("소나타", carType, fuelType)
         );
-        given(carRepository.findAllBySearchCondition(
-                null, List.of(carType), List.of(fuelType), null, null, null, null, null, null
-        )).willReturn(cars);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Car> carPage = new PageImpl<>(cars, pageable, cars.size());
+
+        when(carRepository.findAllBySearchCondition(
+                null,                   // keyword
+                List.of(carType),       // carType
+                List.of(fuelType),      // fuelType
+                null,                   // minSellingPrice
+                null,                   // maxSellingPrice
+                null,                   // minMileage
+                null,                   // maxMileage
+                null,                   // minYear
+                null,                   // maxYear
+                pageable               // pageable 추가
+        )).thenReturn(carPage);
 
         // when
         CarSearchRequest request = CarSearchRequest.ofSingle(
                 null, carType, fuelType, null, null, null, null, null, null
         );
-        List<CarDto> result = carService.searchCars(request);
+        Page<CarDto> result = carService.searchCars(request, "userId", pageable);
 
         // then
-        assertThat(result).hasSize(2);
-        assertThat(result).allMatch(car ->
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).allMatch(car ->
                 car.carName().contains("아반떼") || car.carName().contains("소나타")
         );
 
@@ -134,19 +155,32 @@ class CarServiceTest {
         Long minPrice = 2000L;
         Long maxPrice = 3000L;
         List<Car> cars = List.of(createCarWithPrice("아반떼", 2500L));
-        given(carRepository.findAllBySearchCondition(
-                null, null, null, minPrice, maxPrice, null, null, null, null
-        )).willReturn(cars);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Car> carPage = new PageImpl<>(cars, pageable, cars.size());
+
+        when(carRepository.findAllBySearchCondition( //
+                null,           // keyword
+                null,           // carType
+                null,           // fuelType
+                minPrice,       // minSellingPrice
+                maxPrice,       // maxSellingPrice
+                null,           // minMileage
+                null,           // maxMileage
+                null,           // minYear
+                null,           // maxYear
+                pageable        // pageable 추가
+        )).thenReturn(carPage);
 
         // when
         CarSearchRequest request = new CarSearchRequest(
                 null, null, null, minPrice, maxPrice, null, null, null, null
         );
-        List<CarDto> result = carService.searchCars(request);
+        Page<CarDto> result = carService.searchCars(request, "userId", pageable);
 
         // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).sellingPrice()).isBetween(2000L, 3000L);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).sellingPrice()).isBetween(2000L, 3000L);
     }
 
     @Test
@@ -164,34 +198,47 @@ class CarServiceTest {
 
         List<Car> cars = List.of(
                 Car.builder()
+                        .id(1L)
                         .carName("아반떼 CN7")
                         .carNumber("12가3456")
                         .carType("세단")
                         .fuelType("가솔린")
                         .sellingPrice(2500L)
                         .mileage(10000L)
-                        .year(2022L)
+                        .initialRegistration("2022-01")
                         .mainImage("image1.jpg")
                         .build(),
                 Car.builder()
-
+                        .id(2L)
                         .carName("아반떼 하이브리드")
                         .carNumber("34나5678")
                         .carType("세단")
                         .fuelType("하이브리드")
                         .sellingPrice(2800L)
                         .mileage(8000L)
-                        .year(2021L)
+                        .initialRegistration("2021-01")
                         .mainImage("image2.jpg")
                         .build()
         );
 
-        given(carRepository.findAllBySearchCondition(
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Car> carPage = new PageImpl<>(cars, pageable, cars.size());
+
+
+        when(carRepository.findAllBySearchCondition(
                 keyword, carTypes, fuelTypes,
                 minPrice, maxPrice,
                 minMileage, maxMileage,
-                minYear, maxYear
-        )).willReturn(cars);
+                minYear, maxYear,
+                pageable
+        )).thenReturn(carPage);
+
+        // LikeRepository mock 동작 추가
+        when(likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(1L, "userId"))
+                .thenReturn(false);
+        when(likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(2L, "userId"))
+                .thenReturn(false);
+
 
         // when
         CarSearchRequest request = new CarSearchRequest(
@@ -200,7 +247,7 @@ class CarServiceTest {
                 minMileage, maxMileage,
                 minYear, maxYear
         );
-        List<CarDto> result = carService.searchCars(request);
+        Page<CarDto> result = carService.searchCars(request,"userId", pageable);
 
         // then
         assertThat(result).hasSize(2);
@@ -208,7 +255,6 @@ class CarServiceTest {
             assertThat(car.carName()).contains(keyword);
             assertThat(car.sellingPrice()).isBetween(minPrice, maxPrice);
             assertThat(car.mileage()).isBetween(minMileage, maxMileage);
-            assertThat(car.year()).isBetween(minYear, maxYear);
         });
 
         // 구체적인 결과 검증
@@ -223,26 +269,23 @@ class CarServiceTest {
     private List<Car> createSampleCars() {
         return List.of(
                 Car.builder()
-
                         .carName("아반떼 CN7")
                         .carNumber("12가3456")
                         .carType("세단")
                         .fuelType("가솔린")
                         .mainImage("image1.jpg")
-                        .year(2022L)
+                        .initialRegistration("2022년 1월")
                         .mileage(10000L)
                         .sellingPrice(2500L)
-
                         .build(),
 
                 Car.builder()
-
                         .carName("투싼 NX4")
                         .carNumber("34나5678")
                         .carType("SUV")
                         .fuelType("디젤")
                         .mainImage("image2.jpg")
-                        .year(2021L)
+                        .initialRegistration("2021년 2월")
                         .mileage(25000L)
                         .sellingPrice(3200L)
                         .build(),
@@ -253,7 +296,7 @@ class CarServiceTest {
                         .carType("세단")
                         .fuelType("가솔린")
                         .mainImage("image3.jpg")
-                        .year(2020L)
+                        .initialRegistration("2023년 2월")
                         .mileage(45000L)
                         .sellingPrice(2800L)
                         .build(),
@@ -264,7 +307,7 @@ class CarServiceTest {
                         .carType("세단")
                         .fuelType("LPG")
                         .mainImage("image4.jpg")
-                        .year(2023L)
+                        .initialRegistration("2023년 3월")
                         .mileage(5000L)
                         .sellingPrice(3000L)
                         .build(),
@@ -275,7 +318,7 @@ class CarServiceTest {
                         .carType("승합")
                         .fuelType("디젤")
                         .mainImage("image5.jpg")
-                        .year(2022L)
+                        .initialRegistration("2022년 9월")
                         .mileage(30000L)
                         .sellingPrice(4200L)
                         .build()
@@ -284,13 +327,12 @@ class CarServiceTest {
 
     private Car createCar(String name, String type, String fuel) {
         return Car.builder()
-
                 .carName(name)
                 .carNumber("12가3456")
                 .carType(type)
                 .fuelType(fuel)
                 .mainImage("image1.jpg")
-                .year(2022L)
+                .initialRegistration("2022년 1월")
                 .mileage(10000L)
                 .sellingPrice(2500L)
                 .build();
@@ -299,12 +341,12 @@ class CarServiceTest {
     private Car createCarWithPrice(String name, Long price) {
         return Car.builder()
                 .carName(name)
-                .carNumber("테스트번호")  // 필수 필드 추가
-                .carType("세단")         // 필수 필드 추가
-                .fuelType("가솔린")      // 필수 필드 추가
-                .mainImage("test.jpg")   // 필수 필드 추가
-                .year(2022L)            // 필수 필드 추가
-                .mileage(10000L)        // 필수 필드 추가
+                .carNumber("테스트번호")
+                .carType("세단")
+                .fuelType("가솔린")
+                .mainImage("test.jpg")
+                .initialRegistration("2023년 1월")
+                .mileage(10000L)
                 .sellingPrice(price)
                 .build();
     }
@@ -341,7 +383,7 @@ class CarServiceTest {
         ReflectionTestUtils.setField(accidentHistory, "updatedAt", now);
         car.getAccidentHistoryList().add(accidentHistory);
 
-        given(carRepository.findByIdWithDetails(carId)).willReturn(Optional.of(car));
+        when(carRepository.findByIdWithDetails(carId)).thenReturn(Optional.of(car));
 
         // when
         CarDetailDto result = carService.getCarDetail(carId);
@@ -350,7 +392,7 @@ class CarServiceTest {
         assertThat(result).satisfies(detail -> {
             // Car 기본 정보 검증
             assertThat(detail.carName()).isEqualTo("아반떼 CN7");
-            assertThat(detail.year()).isEqualTo(2022L);
+            assertThat(detail.initialRegistration()).isEqualTo("22년 01월");
             assertThat(detail.mileage()).isEqualTo(10000L);
             assertThat(detail.sellingPrice()).isEqualTo(2500L);
             assertThat(detail.exteriorColor()).isEqualTo("검정");
@@ -359,7 +401,6 @@ class CarServiceTest {
             assertThat(detail.fuelType()).isEqualTo("가솔린");
             assertThat(detail.transmissionType()).isEqualTo("자동8단");
             assertThat(detail.location()).isEqualTo("서울 강남구");
-            assertThat(detail.fuelEfficiency()).isEqualTo(12.5);
             assertThat(detail.mainImage()).isEqualTo("main.jpg");
             assertThat(detail.newCarPrice()).isEqualTo(2800L);
             assertThat(detail.carNumber()).isEqualTo("12가3456");
@@ -393,7 +434,7 @@ class CarServiceTest {
                 .carNumber("12가3456")
                 .carType("세단")
                 .year(2022L)
-                .initialRegistration("202201")
+                .initialRegistration("2022-01")
                 .mileage(10000L)
                 .driveType("FF")
                 .displacement(1598L)
@@ -404,7 +445,6 @@ class CarServiceTest {
                 .fuelType("가솔린")
                 .transmissionType("자동8단")
                 .location("서울 강남구")
-                .fuelEfficiency(12.5)
                 .mainImage("main.jpg")
                 .newCarPrice(2800L)
                 .carNumber("12가3456")
@@ -445,21 +485,17 @@ class CarServiceTest {
 
 
 
-
-
     @Test
     void getCarDetail_whenCarNotExists_throwEntityNotFoundException() { // 차량이 존재하지 않을 때 적절한 예외를 발생????
         // given
         Long carId = 999L;
 
-        given(carRepository.findByIdWithDetails(carId)).willReturn(Optional.empty());
+        when(carRepository.findByIdWithDetails(carId)).thenReturn(Optional.empty());
 
         // when & then
         assertThrows(CarNotFoundException.class, () -> {
             carService.getCarDetail(carId);
         });
-
-
 
     }
 
@@ -478,8 +514,8 @@ class CarServiceTest {
             ReflectionTestUtils.setField(image, "updatedAt", now);
         });
 
-        given(carRepository.findAllByCarIdOrderByRotationDegree(carId))
-                .willReturn(images);
+        when(carRepository.findAllByCarIdOrderByRotationDegree(carId))
+                .thenReturn(images);
 
         // when
         List<Exterior360ImageDto> result = carService.get360Images(carId);
@@ -493,7 +529,6 @@ class CarServiceTest {
             assertThat(image.updatedAt()).isNotNull();
         });
 
-        // 구체적인 검증
         assertThat(result).anySatisfy(image -> {
             assertThat(image.rotationDegree()).isEqualTo(0);
             assertThat(image.imageUrl()).isEqualTo("exterior_0.jpg");
@@ -509,8 +544,8 @@ class CarServiceTest {
     void get360Images_whenNoImagesExist_throwImageNotFoundException() {
         // given
         Long carId = 999L;
-        given(carRepository.findAllByCarIdOrderByRotationDegree(carId))
-                .willReturn(new ArrayList<>());
+        when(carRepository.findAllByCarIdOrderByRotationDegree(carId))
+                .thenReturn(new ArrayList<>());
 
         // when & then
         assertThrows(ImageNotFoundException.class, () -> {
@@ -546,8 +581,8 @@ class CarServiceTest {
             ReflectionTestUtils.setField(image, "updatedAt", now);
         });
 
-        given(carRepository.findAllDetailImagesByCarId(carId))
-                .willReturn(images);
+        when(carRepository.findAllDetailImagesByCarId(carId))
+                .thenReturn(images);
 
         // when
         List<DetailImageDto> result = carService.getDetailImages(carId);
@@ -561,7 +596,6 @@ class CarServiceTest {
             assertThat(image.updatedAt()).isNotNull();
         });
 
-        // 구체적인 검증
         assertThat(result).anySatisfy(image -> {
             assertThat(image.imageUrl()).isEqualTo("detail_1.jpg");
         });
@@ -571,8 +605,8 @@ class CarServiceTest {
     void getDetailImages_whenNoImagesExist_throwImageNotFoundException() {
         // given
         Long carId = 999L;
-        given(carRepository.findAllDetailImagesByCarId(carId))
-                .willReturn(new ArrayList<>());
+        when(carRepository.findAllDetailImagesByCarId(carId))
+                .thenReturn(new ArrayList<>());
 
         // when & then
         assertThrows(ImageNotFoundException.class, () -> {
@@ -601,13 +635,15 @@ class CarServiceTest {
     @Test
     void getCarList_orderByMmScoreDesc_returnTopFiveCars() { // mmScore 상위 5개 차량
         // given
+        String testUserId = "testUser";
         LocalDateTime now = LocalDateTime.now();
 
 
         List<Car> mockCars = List.of(
                 Car.builder()
+                        .id(1L)
                         .carName("제네시스 G80")
-                        .year(2023L)
+                        .initialRegistration("2022-01")
                         .mileage(1000L)
                         .sellingPrice(50000000L)
                         .mainImage("genesis_g80.jpg")
@@ -615,8 +651,9 @@ class CarServiceTest {
                         .contractedAt(now)
                         .build(),
                 Car.builder()
+                        .id(2L)
                         .carName("그랜저 하이브리드")
-                        .year(2022L)
+                        .initialRegistration("2022-01")
                         .mileage(5000L)
                         .sellingPrice(45000000L)
                         .mainImage("grandeur.jpg")
@@ -624,8 +661,9 @@ class CarServiceTest {
                         .contractedAt(now)
                         .build(),
                 Car.builder()
+                        .id(3L)
                         .carName("벤츠 E클래스")
-                        .year(2023L)
+                        .initialRegistration("2022-01")
                         .mileage(3000L)
                         .sellingPrice(70000000L)
                         .mainImage("benz_e.jpg")
@@ -633,8 +671,9 @@ class CarServiceTest {
                         .contractedAt(now)
                         .build(),
                 Car.builder()
+                        .id(4L)
                         .carName("BMW 5시리즈")
-                        .year(2022L)
+                        .initialRegistration("2022-01")
                         .mileage(8000L)
                         .sellingPrice(65000000L)
                         .mainImage("bmw_5.jpg")
@@ -642,8 +681,9 @@ class CarServiceTest {
                         .contractedAt(now)
                         .build(),
                 Car.builder()
+                        .id(5L)
                         .carName("아우디 A6")
-                        .year(2023L)
+                        .initialRegistration("2023-01")
                         .mileage(2000L)
                         .sellingPrice(68000000L)
                         .mainImage("audi_a6.jpg")
@@ -652,10 +692,15 @@ class CarServiceTest {
                         .build()
         );
 
-        given(carRepository.findTop5ByOrderByMmScoreDesc()).willReturn(mockCars);
+        when(carRepository.findTop5ByOrderByMmScoreDesc()).thenReturn(mockCars);
+
+        // Like 관련 mock 추가
+        when(likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(anyLong(), eq(testUserId))).thenReturn(false);
+        when(likeRepository.countByCarIdAndIsLikeTrue(anyLong())).thenReturn(0L);
+
 
         // when
-        MmScoreResponse response = carService.getTop5CarsByMmScore();
+        MmScoreResponse response = carService.getTop5CarsByMmScore(testUserId);
 
         // then
         assertThat(response).isNotNull();
@@ -664,7 +709,7 @@ class CarServiceTest {
         // 첫 번째 차량 검증
         MmScoreDto firstCar = response.contents().get(0);
         assertThat(firstCar.carName()).isEqualTo("제네시스 G80");
-        assertThat(firstCar.year()).isEqualTo(2023L);
+        assertThat(firstCar.initialRegistration()).isEqualTo("22년 01월");
         assertThat(firstCar.mileage()).isEqualTo(1000L);
         assertThat(firstCar.sellingPrice()).isEqualTo(50000000L);
         assertThat(firstCar.mainImage()).isEqualTo("genesis_g80.jpg");
@@ -677,11 +722,10 @@ class CarServiceTest {
         assertThat(mmScores)
                 .isSortedAccordingTo((a, b) -> Double.compare(b, a)); // 내림차순 검증
 
-        // 각 차량의 필수 필드 존재 여부 검증
         response.contents().forEach(car -> {
             //assertThat(car.carId()).isNotNull();
             assertThat(car.carName()).isNotNull();
-            assertThat(car.year()).isNotNull();
+            assertThat(car.initialRegistration()).isNotNull();
             assertThat(car.mileage()).isNotNull();
             assertThat(car.sellingPrice()).isNotNull();
             assertThat(car.mainImage()).isNotNull();
@@ -696,10 +740,12 @@ class CarServiceTest {
     void getCarList_withLessThanFiveData_returnAllAvailableCars() { // 데이터 5개 미만 (3개로 해보자)
         // given
         LocalDateTime now = LocalDateTime.now();
+        String testUserId = "testUser";
         List<Car> mockCars = List.of(
                 Car.builder()
+                        .id(1L)
                         .carName("제네시스 G80")
-                        .year(2023L)
+                        .initialRegistration("2023-01")
                         .mileage(1000L)
                         .sellingPrice(50000000L)
                         .mainImage("genesis_g80.jpg")
@@ -707,8 +753,9 @@ class CarServiceTest {
                         .contractedAt(now)
                         .build(),
                 Car.builder()
+                        .id(2L)
                         .carName("그랜저 하이브리드")
-                        .year(2022L)
+                        .initialRegistration("2022-01")
                         .mileage(5000L)
                         .sellingPrice(45000000L)
                         .mainImage("grandeur.jpg")
@@ -716,8 +763,9 @@ class CarServiceTest {
                         .contractedAt(now)
                         .build(),
                 Car.builder()
+                        .id(3L)
                         .carName("벤츠 E클래스")
-                        .year(2023L)
+                        .initialRegistration("2022-01")
                         .mileage(3000L)
                         .sellingPrice(70000000L)
                         .mainImage("benz_e.jpg")
@@ -726,10 +774,18 @@ class CarServiceTest {
                         .build()
         );
 
-        given(carRepository.findTop5ByOrderByMmScoreDesc()).willReturn(mockCars);
+        when(carRepository.findTop5ByOrderByMmScoreDesc()).thenReturn(mockCars);
+
+        when(likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(1L, testUserId)).thenReturn(false);
+        when(likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(2L, testUserId)).thenReturn(false);
+        when(likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(3L, testUserId)).thenReturn(false);
+
+        when(likeRepository.countByCarIdAndIsLikeTrue(1L)).thenReturn(0L);
+        when(likeRepository.countByCarIdAndIsLikeTrue(2L)).thenReturn(0L);
+        when(likeRepository.countByCarIdAndIsLikeTrue(3L)).thenReturn(0L);
 
         // when
-        MmScoreResponse response = carService.getTop5CarsByMmScore();
+        MmScoreResponse response = carService.getTop5CarsByMmScore(testUserId);
 
         // then
         assertThat(response).isNotNull();
@@ -738,7 +794,7 @@ class CarServiceTest {
         // 첫 번째 차량 검증
         MmScoreDto firstCar = response.contents().get(0);
         assertThat(firstCar.carName()).isEqualTo("제네시스 G80");
-        assertThat(firstCar.year()).isEqualTo(2023L);
+        assertThat(firstCar.initialRegistration()).isEqualTo("23년 01월");
         assertThat(firstCar.mileage()).isEqualTo(1000L);
         assertThat(firstCar.sellingPrice()).isEqualTo(50000000L);
         assertThat(firstCar.mainImage()).isEqualTo("genesis_g80.jpg");
@@ -749,13 +805,12 @@ class CarServiceTest {
                 .map(MmScoreDto::mmScore)
                 .toList();
         assertThat(mmScores)
-                .isSortedAccordingTo((a, b) -> Double.compare(b, a)); // 내림차순 검증
+                .isSortedAccordingTo((a, b) -> Double.compare(b, a)); // 내림차수
 
-        // 각 차량의 필수 필드 존재 여부 검증
         response.contents().forEach(car -> {
             //assertThat(car.carId()).isNotNull();
             assertThat(car.carName()).isNotNull();
-            assertThat(car.year()).isNotNull();
+            assertThat(car.initialRegistration()).isNotNull();
             assertThat(car.mileage()).isNotNull();
             assertThat(car.sellingPrice()).isNotNull();
             assertThat(car.mainImage()).isNotNull();
@@ -770,10 +825,11 @@ class CarServiceTest {
     @Test
     void getCarList_withNoData_returnEmptyList() { // 데이터가 없으면?? 빈 리스트 반환
         // given
-        given(carRepository.findTop5ByOrderByMmScoreDesc()).willReturn(List.of());
+        String testUserId = "testUser";
+        when(carRepository.findTop5ByOrderByMmScoreDesc()).thenReturn(List.of());
 
         // when
-        MmScoreResponse response = carService.getTop5CarsByMmScore();
+        MmScoreResponse response = carService.getTop5CarsByMmScore(testUserId);
 
         // then
         assertThat(response).isNotNull();

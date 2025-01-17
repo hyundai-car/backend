@@ -54,7 +54,7 @@ public class CarService {
     @Transactional
     public CarDetailDto getCarDetail(Long carId) {
         Car car = carRepository.findByIdWithDetails(carId)
-                .orElseThrow(() -> new CarNotFoundException());
+                .orElseThrow(CarNotFoundException::new);
 
         log.info("Found car with id: {}", carId);
 

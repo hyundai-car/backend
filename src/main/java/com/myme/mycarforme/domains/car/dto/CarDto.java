@@ -3,7 +3,7 @@ package com.myme.mycarforme.domains.car.dto;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.global.util.helper.DateFormatHelper;
 
-public record CarDto( // 찜 빼고
+public record CarDto(
                       Long carId, String carName, String initialRegistration, Long mileage, Long sellingPrice, String mainImage, String carNumber, Boolean isLike, Long likeCount, String createdAt, String updatedAt) {
     public static CarDto of(Car car, Boolean isLike, Long likeCount) {
         return new CarDto(

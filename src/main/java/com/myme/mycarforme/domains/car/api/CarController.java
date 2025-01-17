@@ -37,7 +37,6 @@ public class CarController {
 
     @GetMapping("/{carId}")
     public CommonResponse<CarDetailResponse> getCarDetail(@PathVariable Long carId) {
-        String userId = SecurityUtil.getUserId();
         CarDetailDto carDetailDto = carService.getCarDetail(carId);
         return CommonResponse.from(CarDetailResponse.from(carDetailDto));
     }

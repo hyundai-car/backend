@@ -25,6 +25,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -66,12 +68,12 @@ class CarControllerTest {
                         .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].carName").value("아반떼 CN7"))
-                .andExpect(jsonPath("$.content[1].carName").value("소나타 DN8"))
+                .andExpect(jsonPath("$.contents[0].carName").value("아반떼 CN7"))
+                .andExpect(jsonPath("$.contents[1].carName").value("소나타 DN8"))
                 .andExpect(jsonPath("$.totalElements").value(2))
                 .andExpect(jsonPath("$.totalPages").value(1))
-                .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.number").value(0));
+                .andExpect(jsonPath("$.pageSize").value(10))
+                .andExpect(jsonPath("$.pageNumber").value(0));
     }
 
     @Test
@@ -109,14 +111,14 @@ class CarControllerTest {
         Long carId = 1L;
         CarDetailDto carDetail = createTestCarDetailDto();
 
-        given(carService.getCarDetail(eq(carId))).willReturn(carDetail);
+        when(carService.getCarDetail(eq(carId))).thenReturn(carDetail);
 
         // when & then
         mockMvc.perform(get("/api/cars/{carId}", carId))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.car.carName").value("아반떼 CN7"))  // data -> car
-                .andExpect(jsonPath("$.car.year").value("2022"))            // data -> car
+                .andExpect(jsonPath("$.car.initialRegistration").value("22년 01월"))            // data -> car
                 .andExpect(jsonPath("$.car.optionLists.hasNavigation").value(true))  // data -> car
                 .andExpect(jsonPath("$.car.accidentHistoryList").isArray())   // data -> car
                 .andExpect(jsonPath("$.car.accidentHistoryList[0].carPartsPrice").value(500));
@@ -143,7 +145,7 @@ class CarControllerTest {
         return  new CarDetailDto(
                 1L,                     // carId
                 "아반떼 CN7",           // carName
-                "2022-01",             // initialRegistration (String으로 변경)
+                "22년 01월",             // initialRegistration (String으로 변경)
                 10000L,                // mileage
                 2500L,                 // sellingPrice
                 95.5,                  // mmScore 추가
@@ -153,7 +155,6 @@ class CarControllerTest {
                 "가솔린",              // fuelType
                 "자동8단",             // transmissionType
                 "서울 강남구",         // location
-                12.5,                  // fuelEfficiency
                 "main.jpg",            // mainImage
                 2800L,                 // newCarPrice
                 "12가3456",            // carNumber
@@ -275,18 +276,18 @@ class CarControllerTest {
         // given
         List<MmScoreDto> mmScoreDtos = List.of(
                 new MmScoreDto(
-                        1L, "제네시스 G80", 2023L, 1000L, 50000000L,
+                        1L, "제네시스 G80", "2023년 3월", 1000L, 50000000L,
                         "genesis_g80.jpg", 98.5,
-                        "2023-01-01", "2023-01-01"
+                        true, 0L, "2023-01-01", "2023-01-01"
                 ),
                 new MmScoreDto(
-                        2L, "그랜저 하이브리드", 2022L, 5000L, 45000000L,
+                        2L, "그랜저 하이브리드", "2022년 2월", 5000L, 45000000L,
                         "grandeur.jpg", 95.0,
-                        "2023-01-01", "2023-01-01"
+                        false, 0L, "2023-01-01", "2023-01-01"
                 )
         );
         MmScoreResponse response = MmScoreResponse.from(mmScoreDtos);
-        given(carService.getTop5CarsByMmScore()).willReturn(response);
+        given(carService.getTop5CarsByMmScore(anyString())).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/cars/mmscores"))
@@ -301,7 +302,7 @@ class CarControllerTest {
     @Test
     void getMmscores_whenNoData_returnEmptyList() throws Exception {
         // given
-        given(carService.getTop5CarsByMmScore())
+        given(carService.getTop5CarsByMmScore(anyString()))
                 .willReturn(MmScoreResponse.from(List.of()));
 
         // when & then
