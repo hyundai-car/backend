@@ -1,5 +1,6 @@
 package com.myme.mycarforme.domains.order.api.response;
 
+import com.myme.mycarforme.domains.order.constant.OrderStatus;
 import com.myme.mycarforme.domains.order.dto.StatusHistoriesDto;
 import java.time.LocalDateTime;
 
@@ -21,21 +22,21 @@ public record OrderStatusResponse(
             LocalDateTime updatedAt
     ) {
         String paymentDeliveryStatusString = switch (paymentDeliveryStatus) {
-            case 1 -> "CONTRACTED";
-            case 2 -> "PAID";
-            case 3 -> "DELIVERING";
-            case 4 -> "DELIVERED";
-            default -> "UNKNOWN";
+            case 1 -> OrderStatus.CONTRACTED.getStatus();
+            case 2 -> OrderStatus.PAID.getStatus();
+            case 3 -> OrderStatus.DELIVERING.getStatus();
+            case 4 -> OrderStatus.DELIVERED.getStatus();
+            default -> OrderStatus.UNKNOWN.getStatus();
         };
 
         return new OrderStatusResponse(
                 carId,
                 paymentDeliveryStatusString,
                 StatusHistoriesDto.builder()
-                        .contractedAt(contractedAt.toString())
-                        .paidAt(paidAt.toString())
-                        .deliveryStartedAt(deliveryStartedAt.toString())
-                        .deliveryEndedAt(deliveryEndedAt.toString())
+                        .contractedAt(contractedAt != null ? contractedAt.toString() : null)
+                        .paidAt(paidAt != null ? paidAt.toString() : null)
+                        .deliveryStartedAt(deliveryStartedAt != null ? deliveryStartedAt.toString() : null)
+                        .deliveryEndedAt(deliveryEndedAt != null ? deliveryEndedAt.toString() : null)
                         .build(),
                 createdAt.toString(),
                 updatedAt.toString()

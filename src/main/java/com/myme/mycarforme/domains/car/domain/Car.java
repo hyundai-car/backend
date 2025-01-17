@@ -130,7 +130,11 @@ public class Car extends BaseTimeEntity {
         this.deliveryEndedAt = null;
     }
 
-
+    public void doContract(String userId) {
+        this.paymentDeliveryStatus = 1;
+        this.buyerId = userId;
+        this.contractedAt = LocalDateTime.now();
+    }
 
 
 }

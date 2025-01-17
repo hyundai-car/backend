@@ -55,4 +55,6 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     List<Car> findTop5ByOrderByMmScoreDesc();
 
     List<Car> findByBuyerId(String userId);
+
+    List<Car> findByBuyerIdAndIsOnSaleNot(String userId, int isOnSale);
 }

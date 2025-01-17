@@ -1,5 +1,8 @@
 package com.myme.mycarforme.domains.auth.dto;
 
+import lombok.Builder;
+
+@Builder
 public record LoginUserInfoDto(
         String email,
         String name,

@@ -32,7 +32,8 @@ public enum ErrorCode {
     LIKE_COMPARISON_LIKE_NOT_FOUND(404, "L003", "비교할 차랑이 찜 목록에 없습니다."),
 
     // Order
-    ORDER_NOT_FOUND(404, "O001", "주문 정보가 존재하지 않습니다.");
+    ORDER_NOT_FOUND(404, "O001", "주문 정보가 존재하지 않습니다."),
+    DUPLICATED_ORDER_FOUND(409, "O002", "주문이 진행 중입니다.");
 
     // ...
 

@@ -21,6 +21,36 @@ public class SecurityUtil {
         return authentication.getName();
     }
 
+    public static String getUserName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+
+        return jwt.getClaimAsString("given_name");
+    }
+
+    public static String getUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+
+        return jwt.getClaimAsString("email");
+    }
+
+    public static String getUserPhoneNumber() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+
+        return jwt.getClaimAsString("phone_number");
+    }
+
     public static Collection<? extends GrantedAuthority> getUserRoleList() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
