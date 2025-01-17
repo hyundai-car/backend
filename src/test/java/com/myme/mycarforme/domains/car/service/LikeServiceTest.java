@@ -94,7 +94,6 @@ class LikeServiceTest {
                 .isOnSale(1)
                 .location("location")
                 .mmScore(90.11)
-                .fuelEfficiency(10.4)
                 .mainImage("https://image")
                 .newCarPrice(6000L)
                 .savingAccount(1200.0)

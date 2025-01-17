@@ -21,4 +21,14 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             "WHERE l.userId = :userId " +
             "AND l.isLike = true")
     Page<Like> findCarsByUserIdAndIsLikeTrue(@Param("userId") String userId, Pageable pageable);
+
+
+    @Query("SELECT COUNT(l) FROM Like l WHERE l.car.id = :carId AND l.isLike = true")
+    Long countByCarIdAndIsLikeTrue(@Param("carId") Long carId);
+
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Like l " +
+            "WHERE l.car.id = :carId AND l.userId = :userId AND l.isLike = true")
+    Boolean existsByCarIdAndUserIdAndIsLikeTrue(@Param("carId") Long carId, @Param("userId") String userId);
+
+
 }

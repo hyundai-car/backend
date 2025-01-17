@@ -3,6 +3,8 @@ package com.myme.mycarforme.domains.car.repository;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.DetailImage;
 import com.myme.mycarforme.domains.car.domain.Exterior360Image;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,7 +25,7 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
             "AND (:maxMileage IS NULL OR c.mileage <= :maxMileage) " +
             "AND (:minYear IS NULL OR c.year >= :minYear) " +
             "AND (:maxYear IS NULL OR c.year <= :maxYear)")
-    List<Car> findAllBySearchCondition(
+    Page<Car> findAllBySearchCondition(
             @Param("keyword") String keyword,
             @Param("carType") List<String> carType,
             @Param("fuelType") List<String> fuelType,
@@ -32,7 +34,8 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
             @Param("minMileage") Long minMileage,
             @Param("maxMileage") Long maxMileage,
             @Param("minYear") Long minYear,
-            @Param("maxYear") Long maxYear
+            @Param("maxYear") Long maxYear,
+            Pageable pageable
     );
 
     @Query("SELECT c FROM Car c " +
