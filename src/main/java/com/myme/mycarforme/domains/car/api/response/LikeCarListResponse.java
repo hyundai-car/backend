@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public record LikeCarListResponse(
-        List<LikeCarDto> content,
+        List<LikeCarDto> contents,
         int pageNumber,
         int pageSize,
         long totalElements,

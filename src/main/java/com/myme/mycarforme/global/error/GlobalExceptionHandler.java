@@ -95,7 +95,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    // 7. 나머지 모든 예외
+    // 7. 내부 파라미터가 잘못됨
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.error("handleIllegalArgumentException", e);
+
+        List<ErrorResponse.FieldError> fieldErrors = List.of(
+                new ErrorResponse.FieldError(
+                        e.getMessage(),
+                        null,
+                        null
+                )
+        );
+
+        ErrorResponse response = ErrorResponse.of(ErrorCode.ILLEGAL_ARGUMENT, fieldErrors);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // 8. 나머지 모든 예외
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(Exception e) {
 

@@ -41,7 +41,6 @@ public class Car extends BaseTimeEntity {
     private Integer isOnSale;
     private String location;
     private Double mmScore;
-    private Double fuelEfficiency;
     private String mainImage;
     private Long newCarPrice;
     private Double savingAccount;
@@ -82,8 +81,7 @@ public class Car extends BaseTimeEntity {
     private Car(Long id, String carName, String carType, Long year, String initialRegistration,
                 Long mileage, String driveType, Long displacement, Long sellingPrice,
                 String exteriorColor, String interiorColor, Long seating, String fuelType,
-                String transmissionType, Integer isOnSale, String location, Double mmScore,
-                Double fuelEfficiency, String mainImage, Long newCarPrice, Double savingAccount,
+                String transmissionType, Integer isOnSale, String location, Double mmScore, String mainImage, Long newCarPrice, Double savingAccount,
                 String carNumber, Double accidentSeverity, Double repairProbability, Double predictedPrice,
                 Double cityEfficiency, Double highwayEfficiency, Integer paymentDeliveryStatus,
                 LocalDateTime contractedAt, LocalDateTime payedAt, LocalDateTime deliveryStartedAt,
@@ -105,7 +103,6 @@ public class Car extends BaseTimeEntity {
         this.isOnSale = isOnSale;
         this.location = location;
         this.mmScore = mmScore;
-        this.fuelEfficiency = fuelEfficiency;
         this.mainImage = mainImage;
         this.newCarPrice = newCarPrice;
         this.savingAccount = savingAccount;

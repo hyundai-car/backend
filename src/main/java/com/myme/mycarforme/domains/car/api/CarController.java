@@ -2,13 +2,15 @@ package com.myme.mycarforme.domains.car.api;
 
 import com.myme.mycarforme.domains.car.api.request.CarSearchRequest;
 import com.myme.mycarforme.domains.car.api.response.*;
-import com.myme.mycarforme.domains.car.dto.CarDetailDto;
-import com.myme.mycarforme.domains.car.dto.DetailImageDto;
-import com.myme.mycarforme.domains.car.dto.Exterior360ImageDto;
-import com.myme.mycarforme.domains.car.dto.MmScoreDto;
+import com.myme.mycarforme.domains.car.dto.*;
 import com.myme.mycarforme.domains.car.service.CarService;
 import com.myme.mycarforme.global.common.response.CommonResponse;
+import com.myme.mycarforme.global.util.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +25,13 @@ public class CarController {
     private final CarService carService;
 
     @GetMapping
-    public CommonResponse<CarListResponse> searchCars(CarSearchRequest request) {
-        CarListResponse response = CarListResponse.of(carService.searchCars(request));
+    public CommonResponse<CarListResponse> searchCars(
+            CarSearchRequest request,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        String userId = SecurityUtil.getUserId();
+        Page<CarDto> carDtoPage = carService.searchCars(request, userId, pageable);
+        CarListResponse response = CarListResponse.of(carDtoPage);
         return CommonResponse.from(response);
     }
 
@@ -48,7 +55,8 @@ public class CarController {
 
     @GetMapping("/mmscores")
     public CommonResponse<MmScoreResponse> getMmscores() {
-        MmScoreResponse response = carService.getTop5CarsByMmScore();
+        String userId = SecurityUtil.getUserId();
+        MmScoreResponse response = carService.getTop5CarsByMmScore(userId);
         return CommonResponse.from(response);
     }
 

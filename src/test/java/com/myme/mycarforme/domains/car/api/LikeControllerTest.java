@@ -2,14 +2,18 @@ package com.myme.mycarforme.domains.car.api;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.myme.mycarforme.domains.car.api.request.LikeComparisonRequest;
 import com.myme.mycarforme.domains.car.api.response.LikeCarListResponse;
+import com.myme.mycarforme.domains.car.api.response.LikeComparisonResponse;
 import com.myme.mycarforme.domains.car.api.response.LikeResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Like;
 import com.myme.mycarforme.domains.car.domain.OptionList;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
+import com.myme.mycarforme.domains.car.exception.LikeComparisonError;
 import com.myme.mycarforme.domains.car.service.LikeService;
 import com.myme.mycarforme.global.util.security.SecurityUtil;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -76,7 +80,6 @@ class LikeControllerTest {
                 .isOnSale(1)
                 .location("location")
                 .mmScore(90.11)
-                .fuelEfficiency(10.4)
                 .mainImage("https://image")
                 .newCarPrice(6000L)
                 .savingAccount(1200.0)
@@ -205,12 +208,83 @@ class LikeControllerTest {
                             .param("sort", sort)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isArray())
-                    .andExpect(jsonPath("$.content[0].carId").value(1L))
-                    .andExpect(jsonPath("$.content[0].carName").value("Test car"))
+                    .andExpect(jsonPath("$.contents").isArray())
+                    .andExpect(jsonPath("$.contents[0].carId").value(1L))
+                    .andExpect(jsonPath("$.contents[0].carName").value("Test car"))
                     .andExpect(jsonPath("$.pageNumber").value(0))
                     .andExpect(jsonPath("$.totalElements").value(1))
                     .andDo(print());
         }
     }
+
+    @Test
+    void getLikeComparison_withValidCarIdList_thenSuccess() throws Exception {
+        // Given
+        Set<Long> carIdList = Set.of(1L, 2L);
+        LikeComparisonRequest request = new LikeComparisonRequest(carIdList);
+
+        LikeComparisonResponse response = LikeComparisonResponse.of(
+                TEST_CAR,
+                90.11,  // mmScoreAvg
+                1.0,    // accidentCountAvg
+                "2022.04.11", // initialRegistrationAvg
+                31200.0,  // mileageAvg
+                10.4,     // fuelEfficiencyAvg
+                95.0,     // bestMmScoreNorm
+                90.0,     // bestAccidentCountNorm
+                85.0,     // bestInitialRegistrationNorm
+                80.0,     // bestMileageNorm
+                75.0,     // bestFuelEfficiencyNorm
+                85.0,     // avgMmScoreNorm
+                80.0,     // avgAccidentCountNorm
+                75.0,     // avgInitialRegistrationNorm
+                70.0,     // avgMileageNorm
+                65.0,     // avgFuelEfficiencyNorm
+                List.of(2L)  // otherCarIds
+        );
+
+        try (MockedStatic<SecurityUtil> mockedStatic = mockStatic(SecurityUtil.class)) {
+            mockedStatic.when(SecurityUtil::getUserId).thenReturn(TEST_USER_ID);
+            when(likeService.getComparisonLikeCarList(TEST_USER_ID, carIdList)).thenReturn(response);
+
+            // When & Then
+            mockMvc.perform(post("/api/likes/comparisons")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.bestCar.carId").value(TEST_CAR_ID))
+                    .andExpect(jsonPath("$.comparisons.mmScoreAvg").value(90.11))
+                    .andExpect(jsonPath("$.comparisons.accidentCountAvg").value(1.0))
+                    .andExpect(jsonPath("$.comparisons.initialRegistrationAvg").value("22년 04월"))
+                    .andExpect(jsonPath("$.graph.best.mmScoreNorm").value(95.0))
+                    .andExpect(jsonPath("$.graph.avg.mmScoreNorm").value(85.0))
+                    .andExpect(jsonPath("$.otherCarIds[0]").value(2L))
+                    .andDo(print());
+        }
+    }
+
+    @Test
+    void getLikeComparison_withInvalidCarIdList_throwException() throws Exception {
+        // Given
+        Set<Long> carIdList = Set.of(1L);  // 2개 미만의 차량
+        LikeComparisonRequest request = new LikeComparisonRequest(carIdList);
+
+        try (MockedStatic<SecurityUtil> mockedStatic = mockStatic(SecurityUtil.class)) {
+            mockedStatic.when(SecurityUtil::getUserId).thenReturn(TEST_USER_ID);
+            when(likeService.getComparisonLikeCarList(TEST_USER_ID, carIdList))
+                    .thenThrow(LikeComparisonError.invalidLength());
+
+            // When & Then
+            mockMvc.perform(post("/api/likes/comparisons")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.code").value("L001"))
+                    .andExpect(jsonPath("$.message").value("비교할 차량이 2개 미만입니다."))
+                    .andDo(print());
+        }
+    }
+
 }
