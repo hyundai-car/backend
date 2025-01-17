@@ -155,6 +155,7 @@ class CarControllerTest {
                 "가솔린",              // fuelType
                 "자동8단",             // transmissionType
                 "서울 강남구",         // location
+                85.4,
                 "main.jpg",            // mainImage
                 2800L,                 // newCarPrice
                 "12가3456",            // carNumber

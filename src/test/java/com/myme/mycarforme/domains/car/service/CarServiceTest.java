@@ -205,7 +205,7 @@ class CarServiceTest {
                         .fuelType("가솔린")
                         .sellingPrice(2500L)
                         .mileage(10000L)
-                        .initialRegistration("2022-01")
+                        .initialRegistration("2022.01.01")
                         .mainImage("image1.jpg")
                         .build(),
                 Car.builder()
@@ -216,7 +216,7 @@ class CarServiceTest {
                         .fuelType("하이브리드")
                         .sellingPrice(2800L)
                         .mileage(8000L)
-                        .initialRegistration("2021-01")
+                        .initialRegistration("2021.01.01")
                         .mainImage("image2.jpg")
                         .build()
         );
@@ -361,7 +361,8 @@ class CarServiceTest {
         // 차량 생성
         Car car = createTestCar();
 
-        // BaseTimeEntity 필드 설정
+        ReflectionTestUtils.setField(car, "highwayEfficiency", 87.5);
+        ReflectionTestUtils.setField(car, "cityEfficiency", 88.5);
         ReflectionTestUtils.setField(car, "createdAt", now);
         ReflectionTestUtils.setField(car, "updatedAt", now);
 
