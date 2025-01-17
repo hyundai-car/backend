@@ -68,6 +68,8 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     @Query("SELECT c FROM Car c WHERE c.isOnSale = 0 ORDER BY c.id DESC LIMIT 5")
     List<Car> findTop5UpcomingCarsByOrderByIdDesc();
 
+    List<Car> findBySellingPriceLessThanEqualAndIsOnSale(Long maxPrice, Integer isOnSale);
+
     @Query("""
     SELECT c.buyerId FROM Car c 
     WHERE c.paymentDeliveryStatus = :status 
