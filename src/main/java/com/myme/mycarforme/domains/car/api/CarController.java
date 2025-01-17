@@ -67,6 +67,13 @@ public class CarController {
         return CommonResponse.from(response);
     }
 
+    @GetMapping("/upcoming")
+    public CommonResponse<UpComingSoonCarResponse> getUpcomingCars() {
+        String userId = SecurityUtil.getUserId();
+        UpComingSoonCarResponse response = carService.getUpcomingCars(userId);
+        return CommonResponse.from(response);
+    }
+
 
 
 }
