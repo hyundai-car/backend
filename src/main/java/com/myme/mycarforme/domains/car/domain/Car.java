@@ -68,8 +68,8 @@ public class Car extends BaseTimeEntity {
 //    @OneToMany(mappedBy = "car")
 //    private List<Visit> visitList;
 //
-//    @OneToMany(mappedBy = "car")
-//    private List<Recommend> recommendList;
+    @OneToMany(mappedBy = "car")
+    private List<Recommend> recommendList;
 //
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<Exterior360Image> exterior360ImageList;
