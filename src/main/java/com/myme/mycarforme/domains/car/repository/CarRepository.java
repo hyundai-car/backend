@@ -57,4 +57,12 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     List<Car> findByBuyerId(String userId);
 
     List<Car> findByBuyerIdAndIsOnSaleNot(String userId, int isOnSale);
+
+    @Query("""
+    SELECT c.buyerId FROM Car c 
+    WHERE c.paymentDeliveryStatus = :status 
+    GROUP BY c.buyerId 
+    ORDER BY MAX(c.payedAt) DESC
+    """)
+    List<String> findDistinctBuyerIdsByPaymentDeliveryStatus(@Param("status") int status);
 }

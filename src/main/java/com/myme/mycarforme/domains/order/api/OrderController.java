@@ -32,12 +32,21 @@ public class OrderController {
         return CommonResponse.from(orderService.getOrderStatus(userId, carId));
     }
 
-    @PutMapping("/{carId}")
+    @PutMapping("/{carId}/contract")
     public CommonResponse<ContractResponse> updateContractStatus(@PathVariable Long carId) {
         String userId = SecurityUtil.getUserId();
         String userName = SecurityUtil.getUserName();
         String email = SecurityUtil.getUserEmail();
         String phoneNumber = SecurityUtil.getUserPhoneNumber();
         return CommonResponse.from(orderService.updateContractStatus(userId,userName,email,phoneNumber,carId));
+    }
+
+    @PutMapping("/{carId}/pay")
+    public CommonResponse<ContractResponse> updatePayStatus(@PathVariable Long carId) {
+        String userId = SecurityUtil.getUserId();
+        String userName = SecurityUtil.getUserName();
+        String email = SecurityUtil.getUserEmail();
+        String phoneNumber = SecurityUtil.getUserPhoneNumber();
+        return CommonResponse.from(orderService.updatePaymentStatus(userId,userName,email,phoneNumber,carId));
     }
 }

@@ -136,5 +136,8 @@ public class Car extends BaseTimeEntity {
         this.contractedAt = LocalDateTime.now();
     }
 
-
+    public void doPay() {
+        this.paymentDeliveryStatus = 2;
+        this.payedAt = LocalDateTime.now();
+    }
 }

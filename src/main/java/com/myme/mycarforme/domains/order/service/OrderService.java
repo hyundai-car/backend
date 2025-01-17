@@ -79,4 +79,36 @@ public class OrderService {
                 300000L
         );
     }
+
+    @Transactional
+    public ContractResponse updatePaymentStatus(String userId, String userName, String email, String phoneNumber, Long carId) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(CarNotFoundException::new);
+
+        // 해당 차가 계약 중이라면 에러
+        if(car.getBuyerId() == null
+                || !car.getBuyerId().equals(userId)
+                || car.getPaymentDeliveryStatus() != 1) {
+            throw new DuplicatedOrderException();
+        }
+
+        // 해당 유저가 계약 중이라면 에러
+        List<Car> orderedCarList = carRepository.findByBuyerIdAndIsOnSaleNot(userId, 2);
+        if(orderedCarList.size() != 1 || orderedCarList.get(0).getPaymentDeliveryStatus() != 1) {
+            throw new DuplicatedOrderException();
+        }
+
+        // 결제 진행
+        car.doPay();
+        Car updatedCar = carRepository.save(car);
+
+        return ContractResponse.of(
+                userName,
+                email,
+                phoneNumber,
+                updatedCar,
+                OrderStatus.PAID.getStatus(),
+                updatedCar.getSellingPrice() * 10000 - 300000L
+        );
+    }
 }
