@@ -120,7 +120,15 @@ public class Car extends BaseTimeEntity {
         this.optionList = optionList;
     }
 
-
+    public void resetOrderStatus() {
+        this.paymentDeliveryStatus = 0;
+        this.isOnSale = 1;
+        this.buyerId = null;
+        this.contractedAt = null;
+        this.payedAt = null;
+        this.deliveryStartedAt = null;
+        this.deliveryEndedAt = null;
+    }
 
 
 
