@@ -43,7 +43,9 @@ public class SecurityConfig {
                     .defaultSuccessUrl("/admin/dashboard", true)
             )
             .authorizeHttpRequests(auth -> {
-                auth.requestMatchers("/admin/**")
+                auth.requestMatchers("/ws/**", "/ws/tracking/**")  // WebSocket 엔드포인트 추가
+                        .permitAll()
+                        .requestMatchers("/admin/**", "/api/admins/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/api/auth/login", "/api/auth/reissue", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()

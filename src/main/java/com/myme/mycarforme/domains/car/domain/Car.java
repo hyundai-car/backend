@@ -21,7 +21,7 @@ public class Car extends BaseTimeEntity {
     private Long id;
 
     @Column(unique = true)
-    private String buyer_id;
+    private String buyerId;
 
     private String carName;
     private String carType;
@@ -68,8 +68,8 @@ public class Car extends BaseTimeEntity {
 //    @OneToMany(mappedBy = "car")
 //    private List<Visit> visitList;
 //
-//    @OneToMany(mappedBy = "car")
-//    private List<Recommend> recommendList;
+    @OneToMany(mappedBy = "car")
+    private List<Recommend> recommendList;
 //
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<Exterior360Image> exterior360ImageList;
@@ -120,9 +120,24 @@ public class Car extends BaseTimeEntity {
         this.optionList = optionList;
     }
 
+    public void resetOrderStatus() {
+        this.paymentDeliveryStatus = 0;
+        this.isOnSale = 1;
+        this.buyerId = null;
+        this.contractedAt = null;
+        this.payedAt = null;
+        this.deliveryStartedAt = null;
+        this.deliveryEndedAt = null;
+    }
 
+    public void doContract(String userId) {
+        this.paymentDeliveryStatus = 1;
+        this.buyerId = userId;
+        this.contractedAt = LocalDateTime.now();
+    }
 
-
-
-
+    public void doPay() {
+        this.paymentDeliveryStatus = 2;
+        this.payedAt = LocalDateTime.now();
+    }
 }

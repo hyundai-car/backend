@@ -55,6 +55,9 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     @Query("SELECT c FROM Car c WHERE c.isOnSale = 1 ORDER BY c.mmScore DESC LIMIT 5")
     List<Car> findTop5ByOrderByMmScoreDesc();
 
+    List<Car> findByBuyerId(String userId);
+
+    List<Car> findByBuyerIdAndIsOnSaleNot(String userId, int isOnSale);
 
     @Query("SELECT c FROM Car c " +
             "WHERE c.isOnSale = 1 " +
@@ -65,7 +68,13 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     @Query("SELECT c FROM Car c WHERE c.isOnSale = 0 ORDER BY c.id DESC LIMIT 5")
     List<Car> findTop5UpcomingCarsByOrderByIdDesc();
 
+    List<Car> findBySellingPriceLessThanEqualAndIsOnSale(Long maxPrice, Integer isOnSale);
 
-
-
+    @Query("""
+    SELECT c.buyerId FROM Car c 
+    WHERE c.paymentDeliveryStatus = :status 
+    GROUP BY c.buyerId 
+    ORDER BY MAX(c.payedAt) DESC
+    """)
+    List<String> findDistinctBuyerIdsByPaymentDeliveryStatus(@Param("status") int status);
 }
