@@ -60,6 +60,13 @@ public class CarController {
         return CommonResponse.from(response);
     }
 
+    @GetMapping("/popular")
+    public CommonResponse<PopularityResponse> getPopularCars() {
+        String userId = SecurityUtil.getUserId();
+        PopularityResponse response = carService.getPopularCars(userId);
+        return CommonResponse.from(response);
+    }
+
 
 
 }

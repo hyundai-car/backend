@@ -16,7 +16,8 @@ import java.util.Optional;
 @Repository
 public interface CarRepository  extends JpaRepository<Car, Long> {
     @Query("SELECT c FROM Car c " +
-            "WHERE (:keyword IS NULL OR c.carName LIKE %:keyword% OR c.carNumber LIKE %:keyword%) " +
+            "WHERE c.isOnSale = 1" +
+            "AND (:keyword IS NULL OR c.carName LIKE %:keyword% OR c.carNumber LIKE %:keyword%) " +
             "AND (:carType IS NULL OR c.carType IN :carType) " +  // 변경
             "AND (:fuelType IS NULL OR c.fuelType IN :fuelType) " + // 변경
             "AND (:minSellingPrice IS NULL OR c.sellingPrice >= :minSellingPrice) " +
@@ -51,8 +52,17 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     @Query("SELECT d FROM DetailImage d WHERE d.car.id = :carId")
     List<DetailImage> findAllDetailImagesByCarId(@Param("carId") Long carId);
 
-    @Query("SELECT c FROM Car c ORDER BY c.mmScore DESC LIMIT 5")
+    @Query("SELECT c FROM Car c WHERE c.isOnSale = 1 ORDER BY c.mmScore DESC LIMIT 5")
     List<Car> findTop5ByOrderByMmScoreDesc();
+
+
+    @Query("SELECT c FROM Car c " +
+            "WHERE c.isOnSale = 1 " +
+            "ORDER BY (SELECT COUNT(l) FROM Like l WHERE l.car = c AND l.isLike = true) DESC " +
+            "LIMIT 5")
+    List<Car> findTop5ByOrderByLikeCountDesc();
+
+
 
 
 
