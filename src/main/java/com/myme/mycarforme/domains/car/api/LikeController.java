@@ -1,6 +1,8 @@
 package com.myme.mycarforme.domains.car.api;
 
+import com.myme.mycarforme.domains.car.api.request.LikeComparisonRequest;
 import com.myme.mycarforme.domains.car.api.response.LikeCarListResponse;
+import com.myme.mycarforme.domains.car.api.response.LikeComparisonResponse;
 import com.myme.mycarforme.domains.car.api.response.LikeResponse;
 import com.myme.mycarforme.domains.car.service.LikeService;
 import com.myme.mycarforme.global.common.response.CommonResponse;
@@ -35,5 +37,14 @@ public class LikeController {
     ) {
         String userId = SecurityUtil.getUserId();
         return CommonResponse.from(likeService.getLikeCarList(userId, pageable));
+    }
+
+    @PostMapping("/comparisons")
+    public CommonResponse<LikeComparisonResponse> getLikeComparison(
+            @RequestBody LikeComparisonRequest carIdList
+    ) {
+        String userId = SecurityUtil.getUserId();
+
+        return CommonResponse.from(likeService.getComparisonLikeCarList(userId, carIdList.carIdList()));
     }
 }
