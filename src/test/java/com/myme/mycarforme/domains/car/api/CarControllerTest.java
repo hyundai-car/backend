@@ -6,10 +6,9 @@ import com.myme.mycarforme.domains.car.dto.*;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.exception.ImageNotFoundException;
 import com.myme.mycarforme.domains.car.service.CarService;
-import jakarta.persistence.EntityNotFoundException;
+import com.myme.mycarforme.global.util.helper.CalculateHelper.CarScoreNormalizer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -164,7 +163,14 @@ class CarControllerTest {
                 LocalDateTime.now().toString(),   // updatedAt
                 createTestOptionListDto(),        // optionLists
                 List.of(createTestAccidentHistoryDto()), // accidentHistoryList
-                1                      // accidentCount 추가
+                1,                      // accidentCount 추가,
+                ComparisonGraphItemDto.builder()
+                        .mmScoreNorm(95.5)
+                        .accidentCountNorm(CarScoreNormalizer.normalizeAccidentCount(1))
+                        .initialRegistrationNorm(CarScoreNormalizer.normalizeInitialRegistration("2022.01.01"))
+                        .mileageNorm(CarScoreNormalizer.normalizeMileage(10000L))
+                        .fuelEfficiencyNorm(CarScoreNormalizer.normalizeFuelEfficiency(15.0))
+                        .build()
         );
     }
 
