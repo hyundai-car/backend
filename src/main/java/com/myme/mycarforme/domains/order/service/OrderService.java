@@ -26,7 +26,7 @@ public class OrderService {
 
     public OrderedCarListResponse getOrderedCarList(String userId) {
         List<Car> orderedCarList = carRepository.findByBuyerId(userId);
-        List<Car> contractingList = carRepository.findByBuyerIdAndIsOnSaleNot(userId, 2);
+        List<Car> contractingList = carRepository.findByBuyerIdAndIsOnSale(userId, 1);
 
         return contractingList.isEmpty()
                 ? OrderedCarListResponse.from(null, orderedCarList)
@@ -73,7 +73,7 @@ public class OrderService {
         }
 
         // 해당 유저의 다른 주문 존재 여부 체크
-        List<Car> orderedCarList = carRepository.findByBuyerIdAndIsOnSaleNot(userId, 2);
+        List<Car> orderedCarList = carRepository.findByBuyerIdAndIsOnSale(userId, 1);
         if (!orderedCarList.isEmpty()) {
             Car orderedCar = orderedCarList.get(0);
             if (!orderedCar.getId().equals(carId)) {
@@ -116,8 +116,13 @@ public class OrderService {
             }
         }
 
+        // 주문 상태가 다른 경우
+        if (!car.getPaymentDeliveryStatus().equals(1)) {
+            throw new InvalidOrderStatusException();
+        }
+
         // 해당 유저의 다른 주문 존재 여부 체크
-        List<Car> orderedCarList = carRepository.findByBuyerIdAndIsOnSaleNot(userId, 2);
+        List<Car> orderedCarList = carRepository.findByBuyerIdAndIsOnSale(userId, 1);
         if (!orderedCarList.isEmpty()) {
             Car orderedCar = orderedCarList.get(0);
             if (!orderedCar.getId().equals(carId)) {
@@ -137,6 +142,78 @@ public class OrderService {
                 OrderStatus.PAID.getStatus(),
                 updatedCar.getSellingPrice() * 10000 - 300000L
         );
+    }
+
+    @Transactional
+    public void updateDeliveryStartedStatus(String userId) {
+        List<Car> carList = carRepository.findByBuyerIdAndIsOnSale(userId, 2);
+
+        if(carList.size() != 1) {
+            throw DuplicatedOrderException.byUser();
+        }
+
+        Car car = carList.get(0);
+
+        // 해당 차량의 주문 상태 체크
+        if (car.getBuyerId() != null) {
+            // 1. 내가 주문한 차량인 경우
+            if (car.getBuyerId().equals(userId)) {
+                if (car.getPaymentDeliveryStatus() != 2) {
+                    throw new InvalidOrderStatusException();
+                }
+            }
+            // 2. 다른 사람이 주문한 차량인 경우
+            else {
+                throw DuplicatedOrderException.forCar();
+            }
+        }
+
+        // 주문 상태가 다른 경우
+        if (!car.getPaymentDeliveryStatus().equals(2)) {
+            throw new InvalidOrderStatusException();
+        }
+
+        // 배송 시작
+        car.doDeliveryStarted();
+        carRepository.save(car);
+
+        // TODO : FCM 알림 발송
+    }
+
+    @Transactional
+    public void updateDeliveryEndedStatus(String userId) {
+        List<Car> carList = carRepository.findByBuyerIdAndIsOnSale(userId, 2);
+
+        if(carList.size() != 1) {
+            throw DuplicatedOrderException.byUser();
+        }
+
+        Car car = carList.get(0);
+
+        // 해당 차량의 주문 상태 체크
+        if (car.getBuyerId() != null) {
+            // 1. 내가 주문한 차량인 경우
+            if (car.getBuyerId().equals(userId)) {
+                if (car.getPaymentDeliveryStatus() != 3) {
+                    throw new InvalidOrderStatusException();
+                }
+            }
+            // 2. 다른 사람이 주문한 차량인 경우
+            else {
+                throw DuplicatedOrderException.forCar();
+            }
+        }
+
+        // 주문 상태가 다른 경우
+        if (!car.getPaymentDeliveryStatus().equals(3)) {
+            throw new InvalidOrderStatusException();
+        }
+
+        // 배송 시작
+        car.doDeliveryEnded();
+        carRepository.save(car);
+
+        // TODO : FCM 알림 발송
     }
 
     public TrackingCodeResponse getTrackingCode(String userId) {

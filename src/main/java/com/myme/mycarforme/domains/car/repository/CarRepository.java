@@ -57,6 +57,8 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
 
     List<Car> findByBuyerId(String userId);
 
+    List<Car> findByBuyerIdAndIsOnSale(String userId, int isOnSale);
+
     List<Car> findByBuyerIdAndIsOnSaleNot(String userId, int isOnSale);
 
     @Query("SELECT c FROM Car c " +

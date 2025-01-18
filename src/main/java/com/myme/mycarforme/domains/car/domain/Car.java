@@ -20,7 +20,6 @@ public class Car extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String buyerId;
 
     private String carName;
@@ -138,6 +137,18 @@ public class Car extends BaseTimeEntity {
 
     public void doPay() {
         this.paymentDeliveryStatus = 2;
+        this.isOnSale = 2;
         this.payedAt = LocalDateTime.now();
+    }
+
+    public void doDeliveryStarted() {
+        this.paymentDeliveryStatus = 3;
+        this.deliveryStartedAt = LocalDateTime.now();
+    }
+
+    public void doDeliveryEnded() {
+        this.paymentDeliveryStatus = 4;
+        this.isOnSale = 3;
+        this.deliveryEndedAt = LocalDateTime.now();
     }
 }

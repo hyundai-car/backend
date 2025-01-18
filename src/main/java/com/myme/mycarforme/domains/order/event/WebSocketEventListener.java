@@ -1,5 +1,6 @@
 package com.myme.mycarforme.domains.order.event;
 
+import com.myme.mycarforme.domains.order.service.OrderService;
 import com.myme.mycarforme.global.config.websocket.ActiveTrackingManager;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @RequiredArgsConstructor
 public class WebSocketEventListener {
     private final ActiveTrackingManager activeTrackingManager;
+    private final OrderService orderService;
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
@@ -37,8 +39,7 @@ public class WebSocketEventListener {
                     log.info("새로운 탁송 시작. [sessionId: {}, userId: {}]", sessionId, userId);
                     activeTrackingManager.addTracking(sessionId, userId);
 
-                    // TODO : FCM 알림 발송
-
+                    orderService.updateDeliveryStartedStatus(userId);
                 }
             }
         }
@@ -57,8 +58,7 @@ public class WebSocketEventListener {
                 log.info("탁송 종료. [sessionId: {}, userId: {}]", sessionId, userId);
                 activeTrackingManager.removeTracking(sessionId);
 
-                // TODO : FCM 발송
-
+                orderService.updateDeliveryEndedStatus(userId);
             }
         }
     }
