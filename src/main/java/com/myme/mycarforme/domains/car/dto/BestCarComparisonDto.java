@@ -9,7 +9,7 @@ public record BestCarComparisonDto(
     String mainImage,
     Double mmScore,
     Integer accidentCount,
-    String initialRegistrationDate,
+    String initialRegistration,
     Long mileage,
     Double fuelEfficiency,
     Long sellingPrice,
