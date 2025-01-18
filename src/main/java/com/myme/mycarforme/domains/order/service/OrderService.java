@@ -8,6 +8,7 @@ import com.myme.mycarforme.domains.order.api.response.OrderStatusResponse;
 import com.myme.mycarforme.domains.order.api.response.OrderedCarListResponse;
 import com.myme.mycarforme.domains.order.constant.OrderStatus;
 import com.myme.mycarforme.domains.order.exception.DuplicatedOrderException;
+import com.myme.mycarforme.domains.order.exception.InvalidOrderStatusException;
 import com.myme.mycarforme.domains.order.exception.OrderNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -53,22 +54,34 @@ public class OrderService {
         Car car = carRepository.findById(carId)
                 .orElseThrow(CarNotFoundException::new);
 
-        // 해당 차가 계약 중이라면 에러
-        if(car.getBuyerId() != null || car.getPaymentDeliveryStatus() != 0) {
-            throw new DuplicatedOrderException();
+        // 해당 차량의 주문 상태 체크
+        if (car.getBuyerId() != null) {
+            // 1. 내가 주문한 차량인 경우
+            if (car.getBuyerId().equals(userId)) {
+                if (car.getPaymentDeliveryStatus() != 0) {
+                    throw new InvalidOrderStatusException();
+                }
+            }
+            // 2. 다른 사람이 주문한 차량인 경우
+            else {
+                throw DuplicatedOrderException.forCar();
+            }
         }
 
-        // 해당 유저가 계약 중이라면 에러
+        // 해당 유저의 다른 주문 존재 여부 체크
         List<Car> orderedCarList = carRepository.findByBuyerIdAndIsOnSaleNot(userId, 2);
-        if(!orderedCarList.isEmpty()) {
-            throw new DuplicatedOrderException();
+        if (!orderedCarList.isEmpty()) {
+            Car orderedCar = orderedCarList.get(0);
+            if (!orderedCar.getId().equals(carId)) {
+                throw DuplicatedOrderException.byUser();
+            }
         }
 
         // 계약 진행
         car.doContract(userId);
         Car updatedCar = carRepository.save(car);
 
-        // 문자 발송
+        // TODO : 문자 발송
 
         return ContractResponse.of(
                 userName,
@@ -85,17 +98,27 @@ public class OrderService {
         Car car = carRepository.findById(carId)
                 .orElseThrow(CarNotFoundException::new);
 
-        // 해당 차가 계약 중이라면 에러
-        if(car.getBuyerId() == null
-                || !car.getBuyerId().equals(userId)
-                || car.getPaymentDeliveryStatus() != 1) {
-            throw new DuplicatedOrderException();
+        // 해당 차량의 주문 상태 체크
+        if (car.getBuyerId() != null) {
+            // 1. 내가 주문한 차량인 경우
+            if (car.getBuyerId().equals(userId)) {
+                if (car.getPaymentDeliveryStatus() != 1) {
+                    throw new InvalidOrderStatusException();
+                }
+            }
+            // 2. 다른 사람이 주문한 차량인 경우
+            else {
+                throw DuplicatedOrderException.forCar();
+            }
         }
 
-        // 해당 유저가 계약 중이라면 에러
+        // 해당 유저의 다른 주문 존재 여부 체크
         List<Car> orderedCarList = carRepository.findByBuyerIdAndIsOnSaleNot(userId, 2);
-        if(orderedCarList.size() != 1 || orderedCarList.get(0).getPaymentDeliveryStatus() != 1) {
-            throw new DuplicatedOrderException();
+        if (!orderedCarList.isEmpty()) {
+            Car orderedCar = orderedCarList.get(0);
+            if (!orderedCar.getId().equals(carId)) {
+                throw DuplicatedOrderException.byUser();
+            }
         }
 
         // 결제 진행

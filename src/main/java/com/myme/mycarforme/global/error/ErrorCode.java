@@ -33,7 +33,9 @@ public enum ErrorCode {
 
     // Order
     ORDER_NOT_FOUND(404, "O001", "주문 정보가 존재하지 않습니다."),
-    DUPLICATED_ORDER_FOUND(409, "O002", "주문이 진행 중입니다.");
+    DUPLICATED_ORDER_FOUND_FOR_CAR(409, "O002", "해당 차량은 다른 유저가 주문 진행 중입니다."),
+    DUPLICATED_ORDER_FOUND_BY_USER(409, "O003", "해당 유저는 다른 차량 주문을 진행 중입니다."),
+    INVALID_ORDER_STATUS(400, "O004", "현재 주문 단계에서는 요청 불가능합니다.");
 
     // ...
 
