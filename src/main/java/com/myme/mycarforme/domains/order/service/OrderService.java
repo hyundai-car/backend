@@ -6,10 +6,13 @@ import com.myme.mycarforme.domains.car.repository.CarRepository;
 import com.myme.mycarforme.domains.order.api.response.ContractResponse;
 import com.myme.mycarforme.domains.order.api.response.OrderStatusResponse;
 import com.myme.mycarforme.domains.order.api.response.OrderedCarListResponse;
+import com.myme.mycarforme.domains.order.api.response.TrackingCodeResponse;
 import com.myme.mycarforme.domains.order.constant.OrderStatus;
 import com.myme.mycarforme.domains.order.exception.DuplicatedOrderException;
 import com.myme.mycarforme.domains.order.exception.InvalidOrderStatusException;
 import com.myme.mycarforme.domains.order.exception.OrderNotFoundException;
+import com.myme.mycarforme.domains.order.exception.UserTrackingCodeNotFoundException;
+import com.myme.mycarforme.global.config.websocket.ActiveTrackingManager;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OrderService {
     private final CarRepository carRepository;
+    private final ActiveTrackingManager activeTrackingManager;
 
     public OrderedCarListResponse getOrderedCarList(String userId) {
         List<Car> orderedCarList = carRepository.findByBuyerId(userId);
@@ -133,5 +137,12 @@ public class OrderService {
                 OrderStatus.PAID.getStatus(),
                 updatedCar.getSellingPrice() * 10000 - 300000L
         );
+    }
+
+    public TrackingCodeResponse getTrackingCode(String userId) {
+        String trackingCode = activeTrackingManager.getTrackingCode(userId)
+                .orElseThrow(UserTrackingCodeNotFoundException::new);
+
+        return new TrackingCodeResponse(trackingCode);
     }
 }
