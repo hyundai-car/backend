@@ -8,6 +8,7 @@ import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.exception.ImageNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
 import com.myme.mycarforme.domains.car.repository.LikeRepository;
+import com.myme.mycarforme.global.util.helper.CalculateHelper.CarScoreNormalizer;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -361,8 +362,8 @@ class CarServiceTest {
         // 차량 생성
         Car car = createTestCar();
 
-        ReflectionTestUtils.setField(car, "highwayEfficiency", 87.5);
-        ReflectionTestUtils.setField(car, "cityEfficiency", 88.5);
+        ReflectionTestUtils.setField(car, "highwayEfficiency", 7.5);
+        ReflectionTestUtils.setField(car, "cityEfficiency", 8.5);
         ReflectionTestUtils.setField(car, "createdAt", now);
         ReflectionTestUtils.setField(car, "updatedAt", now);
 
@@ -435,7 +436,7 @@ class CarServiceTest {
                 .carNumber("12가3456")
                 .carType("세단")
                 .year(2022L)
-                .initialRegistration("2022-01")
+                .initialRegistration("2022.01.01")
                 .mileage(10000L)
                 .driveType("FF")
                 .displacement(1598L)
