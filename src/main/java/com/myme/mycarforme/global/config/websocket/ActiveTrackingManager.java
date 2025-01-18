@@ -6,17 +6,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ActiveTrackingManager {
-    private final Set<String> activeTrackingList = ConcurrentHashMap.newKeySet();
+    private final ConcurrentHashMap<String, String> activeTrackingMap = new ConcurrentHashMap<>(); // userId -> trackingCode
 
-    public void addTracking(String trackingCode) {
-        activeTrackingList.add(trackingCode);
+    public void addTracking(String userId, String trackingCode) {
+        activeTrackingMap.put(userId, trackingCode);
     }
 
-    public void removeTracking(String trackingCode) {
-        activeTrackingList.remove(trackingCode);
+    public void removeTracking(String userId) {
+        activeTrackingMap.remove(userId);
     }
 
-    public boolean isActive(String trackingCode) {
-        return activeTrackingList.contains(trackingCode);
+    public boolean isActive(String userId, String trackingCode) {
+        return activeTrackingMap.get(userId).equals(trackingCode);
+    }
+
+    public String getTrackingCode(String userId) {
+        return activeTrackingMap.get(userId);
     }
 }

@@ -33,10 +33,13 @@ public class WebSocketEventListener {
             if (nativeHeaders != null) {
                 String trackingCode = nativeHeaders.get("trackingCode").get(0);
                 String clientType = nativeHeaders.get("clientType").get(0);
+                String userId = nativeHeaders.get("userId").get(0);
 
                 if (trackingCode != null && Objects.equals(clientType, "pub")) {
                     log.info("새로운 탁송 시작. trackingCode: {}", trackingCode);
-                    activeTrackingManager.addTracking(trackingCode);
+                    activeTrackingManager.addTracking(userId, trackingCode);
+
+                    // TODO : FCM 알림 발송
                 }
             }
         }
@@ -54,10 +57,11 @@ public class WebSocketEventListener {
             if (nativeHeaders != null) {
                 String trackingCode = nativeHeaders.get("trackingCode").get(0);
                 String clientType = nativeHeaders.get("clientType").get(0);
+                String userId = nativeHeaders.get("userId").get(0);
 
                 if (trackingCode != null && Objects.equals(clientType, "pub")) {
                     log.info("탁송 종료. trackingCode: {}", trackingCode);
-                    activeTrackingManager.removeTracking(trackingCode);
+                    activeTrackingManager.removeTracking(userId);
                 }
             }
         }
