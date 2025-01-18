@@ -16,7 +16,7 @@ public class LocationController {
     @MessageMapping("/delivery/location")
     public void updateLocation(@Payload LocationMessage location) {
         // 동적 경로 생성
-        String destination = String.format("/sub/tracking/%s/location", location.getTrackingCode());
+        String destination = String.format("/sub/tracking/%s/location", location.getUserId());
 
         // 메시지 전송
         messagingTemplate.convertAndSend(destination, location);

@@ -30,13 +30,12 @@ public class WebSocketEventListener {
                     (Map<String, List<String>>) connectMessage.getHeaders().get("nativeHeaders");
             if (nativeHeaders != null) {
                 String sessionId = headers.getSessionId();
-                String trackingCode = nativeHeaders.get("trackingCode").get(0);
                 String clientType = nativeHeaders.get("clientType").get(0);
                 String userId = nativeHeaders.get("userId").get(0);
 
-                if (trackingCode != null && Objects.equals(clientType, "pub")) {
-                    log.info("새로운 탁송 시작. [sessionId: {}, trackingCode: {}]", sessionId, trackingCode);
-                    activeTrackingManager.addTracking(sessionId, userId, trackingCode);
+                if (userId != null && Objects.equals(clientType, "pub")) {
+                    log.info("새로운 탁송 시작. [sessionId: {}, userId: {}]", sessionId, userId);
+                    activeTrackingManager.addTracking(sessionId, userId);
 
                     // TODO : FCM 알림 발송
 
@@ -52,11 +51,10 @@ public class WebSocketEventListener {
         String sessionId = headers.getSessionId();
 
         if (sessionId != null && activeTrackingManager.isActiveSession(sessionId)) {
-            String trackingCode = activeTrackingManager.getTrackingCodeWithSessionId(sessionId)
-                    .orElse(null);
+            String userId = activeTrackingManager.getUserId(sessionId);
 
-            if (trackingCode != null) {
-                log.info("탁송 종료. [sessionId: {}, trackingCode: {}]", sessionId, trackingCode);
+            if (userId != null) {
+                log.info("탁송 종료. [sessionId: {}, userId: {}]", sessionId, userId);
                 activeTrackingManager.removeTracking(sessionId);
 
                 // TODO : FCM 발송

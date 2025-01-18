@@ -140,9 +140,10 @@ public class OrderService {
     }
 
     public TrackingCodeResponse getTrackingCode(String userId) {
-        String trackingCode = activeTrackingManager.getTrackingCode(userId)
-                .orElseThrow(UserTrackingCodeNotFoundException::new);
-
-        return new TrackingCodeResponse(trackingCode);
+        if(activeTrackingManager.isActive(userId)) {
+            return new TrackingCodeResponse(userId);
+        } else {
+            throw new UserTrackingCodeNotFoundException();
+        }
     }
 }

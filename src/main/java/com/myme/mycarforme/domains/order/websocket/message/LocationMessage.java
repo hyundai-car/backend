@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class LocationMessage {
-    private String trackingCode;
+    private String userId;
     private Double latitude;
     private Double longitude;
     private LocalDateTime timestamp;

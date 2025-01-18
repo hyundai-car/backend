@@ -23,22 +23,13 @@ public class TrackingChannelInterceptor implements ChannelInterceptor {
                 message, StompHeaderAccessor.class);
 
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-            String destination = accessor.getDestination();
-            String trackingCode = extractTrackingCode(destination);
             String userId = accessor.getUser().getName();
 
-            if (!activeTrackingManager.isActive(userId, trackingCode)) {
-                throw new MessageDeliveryException("Inactive tracking code: " + trackingCode);
+            if (!activeTrackingManager.isActive(userId)) {
+                throw new MessageDeliveryException("Inactive userId: " + userId);
             }
         }
 
         return message;
-    }
-    private String extractTrackingCode(String destination) {
-        String[] parts = destination.split("/");
-        if (parts.length >= 4) {
-            return parts[3];
-        }
-        throw new IllegalArgumentException("TrackingCode를 파싱할 수 없습니다 : " + destination);
     }
 }
