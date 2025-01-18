@@ -3,24 +3,20 @@ package com.myme.mycarforme.domains.order.dto;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.global.util.helper.DateFormatHelper;
 
-public record OrderedCarDto(
+public record ContractedCarDto(
         Long carId,
         String carName,
         String initialRegistration,
         Long mileage,
-        Long sellingPrice,
-        String mainImage,
-        Integer likecount
+        Long price
 ) {
-    public static OrderedCarDto from(Car car) {
-        return new OrderedCarDto(
+    public static ContractedCarDto from(Car car) {
+        return new ContractedCarDto(
                 car.getId(),
                 car.getCarName(),
                 DateFormatHelper.toKoreanDateString(car.getInitialRegistration()),
                 car.getMileage(),
-                car.getSellingPrice(),
-                car.getMainImage(),
-                car.getLikeList().size()
+                car.getSellingPrice()
         );
     }
 }

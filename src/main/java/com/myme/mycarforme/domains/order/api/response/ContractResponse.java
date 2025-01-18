@@ -2,12 +2,12 @@ package com.myme.mycarforme.domains.order.api.response;
 
 import com.myme.mycarforme.domains.auth.dto.LoginUserInfoDto;
 import com.myme.mycarforme.domains.car.domain.Car;
-import com.myme.mycarforme.domains.order.dto.OrderedCarDto;
+import com.myme.mycarforme.domains.order.dto.ContractedCarDto;
 import com.myme.mycarforme.domains.order.dto.PaymentInfoDto;
 
 public record ContractResponse(
         LoginUserInfoDto customer,
-        OrderedCarDto car,
+        ContractedCarDto car,
         PaymentInfoDto paymentInfoDto
 ) {
     public static ContractResponse of(
@@ -24,7 +24,7 @@ public record ContractResponse(
                         .name(name)
                         .phoneNumber(phoneNumber)
                         .build(),
-                OrderedCarDto.from(car),
+                ContractedCarDto.from(car),
                 PaymentInfoDto.builder()
                         .paymentType(paymentType)
                         .paidPrice(paidPrice)
