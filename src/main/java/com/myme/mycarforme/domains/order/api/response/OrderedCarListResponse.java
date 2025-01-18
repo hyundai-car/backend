@@ -6,7 +6,7 @@ import java.util.List;
 
 public record OrderedCarListResponse(
         Long contractingId,
-        List<OrderedCarDto> orderedCar
+        List<OrderedCarDto> orderedCars
 ) {
     public static OrderedCarListResponse from(Long contractingId, List<Car> orderedCarList) {
         return new OrderedCarListResponse(
