@@ -1,6 +1,7 @@
 package com.myme.mycarforme.domains.car.dto;
 
 import com.myme.mycarforme.domains.car.domain.Car;
+import com.myme.mycarforme.global.util.helper.CalculateHelper.CarScoreNormalizer;
 import com.myme.mycarforme.global.util.helper.DateFormatHelper;
 
 import java.util.List;
@@ -27,7 +28,9 @@ public record CarDetailDto(Long carId,
                            String updatedAt,
                            OptionListDto optionLists,
                            List<AccidentHistoryDto> accidentHistoryList,
-                           Integer accidentCount) {
+                           Integer accidentCount,
+                           ComparisonGraphItemDto graph
+) {
 
     public static CarDetailDto from(Car car) {
         List<AccidentHistoryDto> accidentHistoryList = car.getAccidentHistoryList().stream()
@@ -56,7 +59,14 @@ public record CarDetailDto(Long carId,
                 car.getUpdatedAt() != null ? car.getUpdatedAt().toString() : null,
                 car.getOptionList() != null ? OptionListDto.from(car.getOptionList()) : null,
                 accidentHistoryList,
-                accidentHistoryList.size()
+                accidentHistoryList.size(),
+                ComparisonGraphItemDto.builder()
+                        .mmScoreNorm(car.getMmScore())
+                        .accidentCountNorm(CarScoreNormalizer.normalizeAccidentCount(car.getAccidentHistoryList().size()))
+                        .initialRegistrationNorm(CarScoreNormalizer.normalizeInitialRegistration(car.getInitialRegistration()))
+                        .mileageNorm(CarScoreNormalizer.normalizeMileage(car.getMileage()))
+                        .fuelEfficiencyNorm(CarScoreNormalizer.normalizeFuelEfficiency((car.getCityEfficiency() + car.getHighwayEfficiency()) / 2))
+                        .build()
         );
     }
 
