@@ -3,6 +3,7 @@ package com.myme.mycarforme.domains.order.service;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
+import com.myme.mycarforme.domains.fcm.service.FCMTokenService;
 import com.myme.mycarforme.domains.order.api.response.ContractResponse;
 import com.myme.mycarforme.domains.order.api.response.OrderStatusResponse;
 import com.myme.mycarforme.domains.order.api.response.OrderedCarListResponse;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 public class OrderService {
     private final CarRepository carRepository;
     private final ActiveTrackingManager activeTrackingManager;
+    private final FCMTokenService fcmTokenService;
 
     public OrderedCarListResponse getOrderedCarList(String userId) {
         List<Car> orderedCarList = carRepository.findByBuyerId(userId);
@@ -177,7 +179,12 @@ public class OrderService {
         car.doDeliveryStarted();
         carRepository.save(car);
 
-        // TODO : FCM 알림 발송
+        //FCM 알림 발송
+        fcmTokenService.sendNotification(
+                userId,
+                "MyCarForMe 차량 탁송 알림",
+                "차량 탁송이 시작됐어요!\n(" + car.getCarName() + ")"
+        );
     }
 
     @Transactional
@@ -213,7 +220,12 @@ public class OrderService {
         car.doDeliveryEnded();
         carRepository.save(car);
 
-        // TODO : FCM 알림 발송
+        // FCM 알림 발송
+        fcmTokenService.sendNotification(
+                userId,
+                "MyCarForMe 차량 탁송 알림",
+                "차량 탁송이 완료되었어요!\n(" + car.getCarName() + ")"
+        );
     }
 
     public TrackingCodeResponse getTrackingCode(String userId) {

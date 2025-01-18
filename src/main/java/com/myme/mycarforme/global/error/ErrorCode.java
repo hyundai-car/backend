@@ -36,8 +36,10 @@ public enum ErrorCode {
     DUPLICATED_ORDER_FOUND_FOR_CAR(409, "O002", "해당 차량은 다른 유저가 주문 진행 중입니다."),
     DUPLICATED_ORDER_FOUND_BY_USER(409, "O003", "해당 유저는 다른 차량 주문을 진행 중입니다."),
     INVALID_ORDER_STATUS(400, "O004", "현재 주문 단계에서는 요청 불가능합니다."),
-    USER_TRACKING_CODE_NOT_FOUND(404, "O005", "탁송 추적 사항이 없습니다.");
+    USER_TRACKING_CODE_NOT_FOUND(404, "O005", "탁송 추적 사항이 없습니다."),
 
+    // FCM
+    FCM_TOKEN_NOT_FOUND(404, "F001", "FCM 토큰이 존재하지 않습니다.");
 
     // ...
 
