@@ -1,4 +1,4 @@
-package com.myme.mycarforme.domains.fcm.domain;
+package com.myme.mycarforme.global.common.fcm.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

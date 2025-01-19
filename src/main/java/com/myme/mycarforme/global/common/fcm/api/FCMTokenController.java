@@ -1,7 +1,7 @@
-package com.myme.mycarforme.domains.fcm.api;
+package com.myme.mycarforme.global.common.fcm.api;
 
-import com.myme.mycarforme.domains.fcm.api.request.FCMTokenRequest;
-import com.myme.mycarforme.domains.fcm.service.FCMTokenService;
+import com.myme.mycarforme.global.common.fcm.api.request.FCMTokenRequest;
+import com.myme.mycarforme.global.common.fcm.service.FCMTokenService;
 import com.myme.mycarforme.global.common.response.CommonResponse;
 import com.myme.mycarforme.global.util.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +17,11 @@ public class FCMTokenController {
     private final FCMTokenService fcmTokenService;
 
     @PostMapping("/token")
-    public CommonResponse<String> registerToken(
+    public CommonResponse<Void> registerToken(
             @RequestBody FCMTokenRequest token
     ) {
         String userId = SecurityUtil.getUserId();
         fcmTokenService.updateFCMToken(userId, token.token());
-        return CommonResponse.from("Token registered successfully");
+        return CommonResponse.empty();
     }
 }

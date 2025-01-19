@@ -1,12 +1,12 @@
-package com.myme.mycarforme.domains.fcm.service;
+package com.myme.mycarforme.global.common.fcm.service;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import com.myme.mycarforme.domains.fcm.domain.FCMToken;
-import com.myme.mycarforme.domains.fcm.exception.FCMTokenNotFoundException;
-import com.myme.mycarforme.domains.fcm.repository.FCMTokenRepository;
+import com.myme.mycarforme.global.common.fcm.domain.FCMToken;
+import com.myme.mycarforme.global.common.fcm.exception.FCMTokenNotFoundException;
+import com.myme.mycarforme.global.common.fcm.repository.FCMTokenRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,6 @@ public class FCMTokenService {
         fcmTokenRepository.save(fcmToken);
     }
 
-    @Transactional
     public void sendNotification(String userId, String title, String body) {
         FCMToken token = fcmTokenRepository.findByUserId(userId)
                 .orElseThrow(FCMTokenNotFoundException::new);

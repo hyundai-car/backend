@@ -1,6 +1,6 @@
-package com.myme.mycarforme.domains.fcm.repository;
+package com.myme.mycarforme.global.common.fcm.repository;
 
-import com.myme.mycarforme.domains.fcm.domain.FCMToken;
+import com.myme.mycarforme.global.common.fcm.domain.FCMToken;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

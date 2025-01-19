@@ -1,4 +1,4 @@
-package com.myme.mycarforme.domains.fcm.exception;
+package com.myme.mycarforme.global.common.fcm.exception;
 
 import com.myme.mycarforme.global.error.ErrorCode;
 import com.myme.mycarforme.global.error.exception.BusinessException;
