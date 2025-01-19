@@ -12,12 +12,15 @@ import com.myme.mycarforme.domains.car.api.request.RecommendRequest.DrivingExper
 import com.myme.mycarforme.domains.car.api.request.RecommendRequest.MaintenanceBudget;
 import com.myme.mycarforme.domains.car.api.request.RecommendRequest.PreferredType;
 import com.myme.mycarforme.domains.car.api.request.RecommendRequest.UsageType;
+import com.myme.mycarforme.domains.car.api.response.RecommendHistoryResponse;
 import com.myme.mycarforme.domains.car.api.response.RecommendResponse;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Recommend;
 import com.myme.mycarforme.domains.car.dto.RecommendDto.CarScore;
 import com.myme.mycarforme.domains.car.dto.RecommendDto.CategoryWeights;
+import com.myme.mycarforme.domains.car.dto.RecommendHistoryDto;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
+import com.myme.mycarforme.domains.car.repository.LikeRepository;
 import com.myme.mycarforme.domains.car.repository.RecommendRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -40,6 +43,7 @@ import org.springframework.stereotype.Service;
 public class RecommendService {
     private final CarRepository carRepository;
     private final RecommendRepository recommendRepository;
+    private final LikeRepository likeRepository;
 
 
     @Transactional
@@ -419,7 +423,7 @@ public class RecommendService {
 
         for (int i = 0; i < topCount; i++) {
             CarScore score = topScores.get(i);
-            recommendations.add(createRecommend(score.car(), 1L, topCategory));
+            recommendations.add(createRecommend(score.car(), (long) i, topCategory));
         }
 
         // 두 번째 카테고리에서 2개 선택
@@ -436,9 +440,9 @@ public class RecommendService {
 
         int secondCount = Math.min(2, secondScores.size());
 
-        for (int i = 0; i < secondCount; i++) {
+        for (int i = topCount; i < topCount + secondCount; i++) {
             CarScore score = secondScores.get(i);
-            recommendations.add(createRecommend(score.car(), 2L, secondCategory));
+            recommendations.add(createRecommend(score.car(), (long) i, secondCategory));
         }
 
         // 만약 5개가 안되면 남은 카테고리에서 추가 선택
@@ -523,11 +527,11 @@ public class RecommendService {
 
     private String generateCondition(String category) {
         return switch (category) {
-            case "efficiency" -> "연비 효율성이 우수한 차량";
-            case "type" -> "선호하는 차종에 부합하는 차량";
-            case "fuel" -> "선호하는 연료 타입의 차량";
-            case "displacement" -> "운전 경험에 적합한 배기량의 차량";
-            case "repair" -> "관리 비용이 적절한 차량";
+            case "efficiency" -> "연비 덕후를 위한 최고의 선택";
+            case "type" -> "당신의 스타일에 딱 맞는 차종";
+            case "fuel" -> "내 연료 취향 저격한 차량";
+            case "displacement" -> "운전의 재미를 완성하는 배기량의 차";
+            case "repair" -> "유지비 걱정 없는 똑똑한 선택";
             default -> "종합적으로 우수한 차량";
         };
     }
@@ -541,6 +545,21 @@ public class RecommendService {
             case "repair" -> "예상 관리 비용이 고객님의 예산에 적합한 차량입니다.";
             default -> "전반적으로 고객님의 조건에 잘 부합하는 차량입니다.";
         };
+    }
+
+    public RecommendHistoryResponse getRecommendHistory(String userId) {
+        List<Recommend> recommendHistory = recommendRepository.findTop10RecommendHistory();
+
+        List<RecommendHistoryDto> contents = recommendHistory.stream()
+                .map(recommend -> {
+                    Long carId = recommend.getCar().getId();
+                    boolean isLike = likeRepository.existsByCarIdAndUserIdAndIsLikeTrue(carId, userId);
+                    long likeCount = likeRepository.countByCarIdAndIsLikeTrue(carId);
+                    return RecommendHistoryDto.of(recommend, isLike, likeCount);
+                })
+                .collect(Collectors.toList());
+
+        return RecommendHistoryResponse.of(contents);
     }
 
     @Getter

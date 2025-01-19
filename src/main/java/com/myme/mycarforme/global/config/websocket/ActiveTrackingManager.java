@@ -1,22 +1,29 @@
 package com.myme.mycarforme.global.config.websocket;
 
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ActiveTrackingManager {
-    private final Set<String> activeTrackingList = ConcurrentHashMap.newKeySet();
+    private final ConcurrentHashMap<String, String> activeSessionMap = new ConcurrentHashMap<>(); // sessionId -> userId
 
-    public void addTracking(String trackingCode) {
-        activeTrackingList.add(trackingCode);
+    public void addTracking(String sessionId, String userId) {
+        activeSessionMap.put(sessionId, userId);
     }
 
-    public void removeTracking(String trackingCode) {
-        activeTrackingList.remove(trackingCode);
+    public void removeTracking(String sessionId) {
+        activeSessionMap.remove(sessionId);
     }
 
-    public boolean isActive(String trackingCode) {
-        return activeTrackingList.contains(trackingCode);
+    public boolean isActiveSession(String sessionId) {
+        return activeSessionMap.containsKey(sessionId);
+    }
+
+    public boolean isActive(String userId) {
+        return activeSessionMap.containsValue(userId);
+    }
+
+    public String getUserId(String sessionId) {
+        return activeSessionMap.get(sessionId);
     }
 }
