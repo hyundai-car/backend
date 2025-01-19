@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+  <title>차량 관리</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <!-- 상단 버튼 영역 -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>차량 관리</h2>
+    <a th:href="@{/admin/cars/create}" class="btn btn-primary">
+      차량 등록
+    </a>
+  </div>
+
+  <!-- 검색 필터 영역 -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form th:action="@{/admin/cars}" method="get" class="row g-3">
+        <div class="col-md-3">
+          <input type="text" class="form-control" name="search" placeholder="차량명 검색"
+                 th:value="${param.search}">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="status">
+            <option value="">상태 전체</option>
+            <option value=0>판매예정</option>
+            <option value=1>판매중</option>
+            <option value=2>결제완료</option>
+            <option value=3>판매완료</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-secondary w-100">검색</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 차량 목록 테이블 -->
+  <div class="card shadow">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>차량 이미지</th>
+            <th>차량명</th>
+            <th>브랜드</th>
+            <th>가격</th>
+            <th>상태</th>
+            <th>등록일</th>
+            <th>관리</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="car : ${carsPage.content}">
+            <td th:text="${car.id}">1</td>
+            <td>
+              <img th:src="${car.mainImage}" alt="차량 이미지" style="width: 50px; height: 50px;">
+            </td>
+            <td th:text="${car.carName}">차량명</td>
+            <td th:text="${car.carType}">차종</td>
+            <td th:text="${#numbers.formatInteger(car.sellingPrice, 3, 'COMMA') + '원'}">가격</td>
+            <td>
+        <span class="badge"
+              th:classappend="${car.isOnSale == 1 ? 'bg-success' : 'bg-secondary'}"
+              th:text="${car.isOnSale == 1 ? '판매중' : (car.isOnSale == 2 ? '계약완료' : '판매완료')}">
+        </span>
+            </td>
+            <td th:text="${#temporals.format(car.createdAt, 'yyyy-MM-dd')}">2024-01-19</td>
+            <td>
+              <a th:href="@{/admin/cars/{id}/edit(id=${car.id})}" class="btn btn-sm btn-outline-primary">수정</a>
+              <button type="button" class="btn btn-sm btn-outline-danger"
+                      th:onclick="'deleteCar(' + ${car.id} + ')'">삭제</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+
+        <!-- 페이지네이션 -->
+        <nav th:replace="~{admin/fragments/pagination :: pagination}"></nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">차량 삭제</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        정말 이 차량을 삭제하시겠습니까?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-danger" id="confirmDelete">삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 삭제 기능 JavaScript -->
+<script th:inline="javascript">
+  let carIdToDelete = null;
+  const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+
+  function deleteCar(carId) {
+    carIdToDelete = carId;
+    deleteModal.show();
+  }
+
+  document.getElementById('confirmDelete').addEventListener('click', function() {
+    if (carIdToDelete) {
+      fetch(`/api/admin/cars/${carIdToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert('삭제 중 오류가 발생했습니다.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('삭제 중 오류가 발생했습니다.');
+      });
+      deleteModal.hide();
+    }
+  });
+</script>
+</body>
+</html>

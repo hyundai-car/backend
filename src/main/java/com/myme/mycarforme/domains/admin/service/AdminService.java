@@ -22,7 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional
@@ -98,5 +100,19 @@ public class AdminService {
                 pageable,
                 sortedActivities.size()
         );
+    }
+
+    public Page<Car> getCars(String search, Integer isOnSale, Pageable pageable) {
+        if (StringUtils.hasText(search) && isOnSale != null) {
+            return carRepository.findByCarNameContainingAndIsOnSaleOrderByIdDesc(
+                    search, isOnSale, pageable);
+        } else if (StringUtils.hasText(search)) {
+            return carRepository.findByCarNameContainingOrderByIdDesc(search, pageable);
+        } else if (isOnSale != null) {
+            return carRepository.findByIsOnSaleOrderByIdDesc(isOnSale, pageable);
+        }
+        return carRepository.findAll(PageRequest.of(pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "id")));
     }
 }

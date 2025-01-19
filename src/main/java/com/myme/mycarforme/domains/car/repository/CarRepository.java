@@ -86,4 +86,8 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay
     );
+
+    Page<Car> findByCarNameContainingAndIsOnSaleOrderByIdDesc(String carName, Integer isOnSale, Pageable pageable);
+    Page<Car> findByCarNameContainingOrderByIdDesc(String carName, Pageable pageable);
+    Page<Car> findByIsOnSaleOrderByIdDesc(Integer isOnSale, Pageable pageable);
 }

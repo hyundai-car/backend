@@ -1,6 +1,7 @@
 package com.myme.mycarforme.domains.admin.api;
 
 import com.myme.mycarforme.domains.admin.service.AdminService;
+import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.service.CarService;
 import com.myme.mycarforme.domains.order.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,13 +10,16 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin")
@@ -41,5 +45,30 @@ public class AdminPageController {
         model.addAttribute("todayOrders", adminService.getTodayOrderCount());
         model.addAttribute("activitiesPage", adminService.getRecentActivities(pageable));
         return "admin/dashboard";
+    }
+
+    // 차량 관리 페이지 관련 엔드포인트 추가
+    @GetMapping("/cars")
+    public String carsList(
+            Model model,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer isOnSale,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<Car> carsPage = adminService.getCars(search, isOnSale, pageable);
+        model.addAttribute("carsPage", carsPage);
+        return "admin/cars";
+    }
+
+    @GetMapping("/cars/create")
+    public String carCreateForm(Model model) {
+//        model.addAttribute("car", new CarForm());  // CarForm은 새로 만들어야 할 DTO
+        return "admin/car-form";
+    }
+
+    @GetMapping("/cars/{id}/edit")
+    public String carEditForm(@PathVariable Long id, Model model) {
+//        model.addAttribute("car", adminService.getCarById(id));  // 이 메서드도 구현 필요
+        return "admin/car-form";
     }
 }
