@@ -43,16 +43,14 @@ public class SecurityConfig {
                     .defaultSuccessUrl("/admin/dashboard", true)
             )
             .authorizeHttpRequests(auth -> {
-                auth.requestMatchers("/ws/**", "/ws/tracking/**")  // WebSocket 엔드포인트 추가
+                auth.requestMatchers("/ws/**", "/ws/tracking/**")
                         .permitAll()
-                        .requestMatchers("/admin/**", "/api/admins/**")
-                        .hasRole("ADMIN")
                         .requestMatchers("/api/auth/login", "/api/auth/reissue", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
-                        .requestMatchers("/api/**")
+                        .requestMatchers("/api/cars/**", "/api/recommendations/**", "api/likes/**", "/api/orders/**", "/api/visits/**", "/api/fcm/**")
                         .hasRole("MEMBER")
-                        .requestMatchers("/", "/login", "/error", "/assets/**")
-                        .permitAll()
+                        .requestMatchers("/admin/**", "/api/admins/**")
+                        .hasRole("ADMIN")
                         .anyRequest()
                         .authenticated();
             });
