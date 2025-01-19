@@ -9,6 +9,7 @@ public record ActivityLogDto(
         LocalDateTime activityDate,
         String username,
         ActivityType activityType,
-        String detail
+        Long carId,
+        String carName
 ) {
 }
