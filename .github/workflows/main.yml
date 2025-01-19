@@ -66,4 +66,5 @@ jobs:
               -e MCFM_SMS_KEY=${{ secrets.MCFM_SMS_KEY }} \
               -e MCFM_SMS_SECRET=${{ secrets.MCFM_SMS_SECRET }} \
               -e MCFM_SMS_NUMBER=${{ secrets.MCFM_SMS_NUMBER }} \
+              -e MCFM_KEYCLOAK_ADMIN_SECRET=${{ secrets.MCFM_KEYCLOAK_ADMIN_SECRET}} \
               ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest
