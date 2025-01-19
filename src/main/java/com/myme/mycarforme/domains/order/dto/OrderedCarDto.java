@@ -6,6 +6,7 @@ import com.myme.mycarforme.global.util.helper.DateFormatHelper;
 public record OrderedCarDto(
         Long carId,
         String carName,
+        String carNumber,
         String initialRegistration,
         Long mileage,
         Long sellingPrice,
@@ -16,6 +17,7 @@ public record OrderedCarDto(
         return new OrderedCarDto(
                 car.getId(),
                 car.getCarName(),
+                car.getCarNumber(),
                 DateFormatHelper.toKoreanDateString(car.getInitialRegistration()),
                 car.getMileage(),
                 car.getSellingPrice(),
