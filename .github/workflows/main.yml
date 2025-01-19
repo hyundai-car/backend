@@ -17,6 +17,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Create Firebase service account file
+        run: |
+          mkdir -p src/main/resources
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > src/main/resources/firebase-service-account.json
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -58,4 +63,7 @@ jobs:
               -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e MCFM_KEYCLOAK_SECRET=${{ secrets.MCFM_KEYCLOAK_SECRET }} \
+              -e MCFM_SMS_KEY=${{ secrets.MCFM_SMS_KEY }} \
+              -e MCFM_SMS_SECRET=${{ secrets.MCFM_SMS_SECRET }} \
+              -e MCFM_SMS_NUMBER=${{ secrets.MCFM_SMS_NUMBER }} \
               ${{ secrets.DOCKERHUB_USERNAME }}/mycarforme-backend:latest
