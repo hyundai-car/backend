@@ -43,4 +43,38 @@ public class AdminService {
         LocalDateTime endOfDay = LocalDateTime.now().with(LocalTime.MAX);
         return carRepository.countByCreatedAtBetweenAndStatusNotZero(startOfDay, endOfDay);
     }
+
+    public List<Car> getAllOrders() {
+        return carRepository.findAllOrdersByUpdatedAtDesc();
+    }
+
+    // 상태별 주문 조회
+    public List<Car> getOrdersByStatus(Integer status) {
+        return carRepository.findAllOrdersByStatusOrderByUpdatedAtDesc(status);
+    }
+
+    // 주문 상태 업데이트
+    @Transactional
+    public void updateOrderStatus(Long carId, Integer status) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 차량이 존재하지 않습니다."));
+
+        switch (status) {
+            case 1 -> car.doContract(car.getBuyerId());
+            case 2 -> car.doPay();
+            case 3 -> car.doDeliveryStarted();
+            case 4 -> car.doDeliveryEnded();
+        }
+    }
+
+    // 주문 상태 초기화
+    @Transactional
+    public void resetOrderStatus(Long carId) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 차량이 존재하지 않습니다."));
+        car.resetOrderStatus();
+    }
+
+
+
 }
