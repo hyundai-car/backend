@@ -28,14 +28,17 @@ public class Recommend extends BaseTimeEntity {
     @JoinColumn(name = "car_id")
     private Car car;
 
+    private String userId;
+
     private LocalDateTime recommendedAt;
     private Long recommendPriority;
     private String recommendCondition;
     private String recommendReason;
 
     @Builder
-    private Recommend( Car car, LocalDateTime recommendedAt, Long recommendPriority, String recommendCondition, String recommendReason ) {
+    private Recommend( Car car, String userId, LocalDateTime recommendedAt, Long recommendPriority, String recommendCondition, String recommendReason ) {
         this.car = car;
+        this.userId = userId;
         this.recommendedAt = recommendedAt;
         this.recommendPriority = recommendPriority;
         this.recommendCondition = recommendCondition;

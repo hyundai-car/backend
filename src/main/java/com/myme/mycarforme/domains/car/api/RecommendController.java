@@ -22,7 +22,7 @@ public class RecommendController {
     @PostMapping("/conditions")
     public CommonResponse<RecommendResponse> recommendCars(@RequestBody RecommendRequest request) {
         String userId = SecurityUtil.getUserId();
-        RecommendResponse response = recommendService.recommendCars(request);
+        RecommendResponse response = recommendService.recommendCars(userId, request);
         return CommonResponse.from(response);
     }
 

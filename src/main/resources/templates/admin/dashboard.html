@@ -15,12 +15,12 @@
           <div class="row align-items-center">
             <div class="col">
               <div class="text-primary fw-bold text-uppercase mb-1">
-                총 회원수
+                등록된 차량
               </div>
-              <div class="h5 mb-0 fw-bold">-</div>
+              <div class="h5 mb-0 fw-bold" th:text="${totalCars}">-</div>
             </div>
             <div class="col-auto">
-              <i class="fas fa-users fa-2x text-gray-300"></i>
+              <i class="fas fa-car fa-2x text-gray-300"></i>
             </div>
           </div>
         </div>
@@ -33,27 +33,9 @@
           <div class="row align-items-center">
             <div class="col">
               <div class="text-success fw-bold text-uppercase mb-1">
-                등록된 차량
-              </div>
-              <div class="h5 mb-0 fw-bold">-</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-car fa-2x text-gray-300"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-start border-4 border-info shadow h-100 py-2">
-        <div class="card-body">
-          <div class="row align-items-center">
-            <div class="col">
-              <div class="text-info fw-bold text-uppercase mb-1">
                 오늘의 주문
               </div>
-              <div class="h5 mb-0 fw-bold">-</div>
+              <div class="h5 mb-0 fw-bold" th:text="${todayOrders}">-</div>
             </div>
             <div class="col-auto">
               <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>

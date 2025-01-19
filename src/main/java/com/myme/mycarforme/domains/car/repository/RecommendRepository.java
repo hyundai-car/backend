@@ -11,11 +11,11 @@ public interface RecommendRepository extends JpaRepository<Recommend, Long> {
     List<Recommend> findByCarId(Long carId);
     List<Recommend> findTop5ByOrderByRecommendPriorityAsc();
 
-    @Query(value = "SELECT * FROM recommends r " +
-            "ORDER BY r.created_at DESC, r.recommend_priority ASC " +
-            "LIMIT 10",
-            nativeQuery = true)
-    List<Recommend> findTop10RecommendHistory();
+    @Query("SELECT r FROM Recommend r " +
+            "WHERE r.userId=:userId " +
+            "ORDER BY r.createdAt DESC, r.recommendPriority ASC " +
+            "LIMIT 10")
+    List<Recommend> findTop10RecommendHistory(@Param("userId") String userId);
 
 
 }
