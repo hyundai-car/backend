@@ -47,12 +47,12 @@ public class RecommendService {
 
 
     @Transactional
-    public RecommendResponse recommendCars(RecommendRequest request) {
+    public RecommendResponse recommendCars(String userId, RecommendRequest request) {
         List<Car> filteredCars = filterCarsByBudget(request.budget());
         CategoryWeights weights = calculateWeights(request);
         List<CarScore> scoredCars = calculateCarScores(filteredCars, weights, request);
         Map<String, List<CarScore>> categoryRankings = rankByCategories(scoredCars);
-        List<Recommend> recommendations = createRecommendations(categoryRankings);
+        List<Recommend> recommendations = createRecommendations(userId, categoryRankings);
         return createResponse(recommendations);
     }
 
@@ -413,7 +413,7 @@ public class RecommendService {
                 .orElse("type"); // 기본값 설정
     }
 
-    private List<Recommend> createRecommendations(Map<String, List<CarScore>> categoryRankings) {
+    private List<Recommend> createRecommendations(String userId, Map<String, List<CarScore>> categoryRankings) {
         List<Recommend> recommendations = new ArrayList<>();
 
         // 최상위 카테고리에서 3개 선택
@@ -423,7 +423,7 @@ public class RecommendService {
 
         for (int i = 0; i < topCount; i++) {
             CarScore score = topScores.get(i);
-            recommendations.add(createRecommend(score.car(), (long) i, topCategory));
+            recommendations.add(createRecommend(score.car(), userId, (long) i, topCategory));
         }
 
         // 두 번째 카테고리에서 2개 선택
@@ -434,15 +434,15 @@ public class RecommendService {
         secondScores = secondScores.stream()
                 .filter(score -> !recommendations.stream()
                         .map(recommend -> recommend.getCar().getId())
-                        .collect(Collectors.toList())
+                        .toList()
                         .contains(score.car().getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         int secondCount = Math.min(2, secondScores.size());
 
         for (int i = topCount; i < topCount + secondCount; i++) {
             CarScore score = secondScores.get(i);
-            recommendations.add(createRecommend(score.car(), (long) i, secondCategory));
+            recommendations.add(createRecommend(score.car(), userId, (long) i, secondCategory));
         }
 
         // 만약 5개가 안되면 남은 카테고리에서 추가 선택
@@ -452,14 +452,14 @@ public class RecommendService {
                     .flatMap(List::stream)
                     .filter(score -> !recommendations.stream()
                             .map(recommend -> recommend.getCar().getId())
-                            .collect(Collectors.toList())
+                            .toList()
                             .contains(score.car().getId()))
                     .sorted((a, b) -> Double.compare(b.totalScore(), a.totalScore()))
                     .limit(remaining)
-                    .collect(Collectors.toList());
+                    .toList();
 
             for (CarScore score : remainingScores) {
-                recommendations.add(createRecommend(score.car(), 2L, findBestCategory(score)));
+                recommendations.add(createRecommend(score.car(), userId, 2L, findBestCategory(score)));
             }
         }
 
@@ -481,9 +481,10 @@ public class RecommendService {
                 .orElse("efficiency");
     }
 
-    private Recommend createRecommend(Car car, Long priority, String category) {
+    private Recommend createRecommend(Car car, String userId, Long priority, String category) {
         return Recommend.builder()
                 .car(car)
+                .userId(userId)
                 .recommendedAt(LocalDateTime.now())
                 .recommendPriority(priority)
                 .recommendCondition(generateCondition(category))
@@ -548,7 +549,7 @@ public class RecommendService {
     }
 
     public RecommendHistoryResponse getRecommendHistory(String userId) {
-        List<Recommend> recommendHistory = recommendRepository.findTop10RecommendHistory();
+        List<Recommend> recommendHistory = recommendRepository.findTop10RecommendHistory(userId);
 
         List<RecommendHistoryDto> contents = recommendHistory.stream()
                 .map(recommend -> {

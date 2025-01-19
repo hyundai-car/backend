@@ -1,5 +1,6 @@
 package com.myme.mycarforme.domains.admin.api;
 
+import com.myme.mycarforme.domains.admin.service.AdminService;
 import com.myme.mycarforme.domains.car.service.CarService;
 import com.myme.mycarforme.domains.order.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,8 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminPageController {
-    private final CarService carService;
-    private final OrderService orderService;
+    private final AdminService adminService;
 
     @GetMapping("/login")
     public String login() {
@@ -26,7 +26,9 @@ public class AdminPageController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard() {
+    public String dashboard(Model model) {
+        model.addAttribute("totalCars", adminService.getTotalCarCount());
+        model.addAttribute("todayOrders", adminService.getTodayOrderCount());
         return "admin/dashboard";
     }
 }
