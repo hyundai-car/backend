@@ -3,6 +3,7 @@ package com.myme.mycarforme.domains.car.repository;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.DetailImage;
 import com.myme.mycarforme.domains.car.domain.Exterior360Image;
+import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -79,4 +80,10 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
     ORDER BY MAX(c.payedAt) DESC
     """)
     List<String> findDistinctBuyerIdsByPaymentDeliveryStatus(@Param("status") int status);
+
+    @Query("SELECT COUNT(e) FROM Car e WHERE e.updatedAt BETWEEN :startOfDay AND :endOfDay AND e.paymentDeliveryStatus != 0")
+    long countByCreatedAtBetweenAndStatusNotZero(
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay
+    );
 }

@@ -1,0 +1,12 @@
+.sidebar {
+  min-height: 100vh;
+  width: 250px;
+}
+
+.main-content {
+  flex: 1;
+}
+
+.border-left-primary {
+  border-left: .25rem solid #4e73df!important;
+}
