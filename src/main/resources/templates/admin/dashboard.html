@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+  <title>대시보드</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <!-- 통계 카드 영역 -->
+  <div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-start border-4 border-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col">
+              <div class="text-primary fw-bold text-uppercase mb-1">
+                총 회원수
+              </div>
+              <div class="h5 mb-0 fw-bold">-</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-users fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-start border-4 border-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col">
+              <div class="text-success fw-bold text-uppercase mb-1">
+                등록된 차량
+              </div>
+              <div class="h5 mb-0 fw-bold">-</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-car fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-start border-4 border-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col">
+              <div class="text-info fw-bold text-uppercase mb-1">
+                오늘의 주문
+              </div>
+              <div class="h5 mb-0 fw-bold">-</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 최근 활동 테이블 -->
+  <div class="card shadow mb-4 mt-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 fw-bold">최근 활동 내역</h6>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+          <tr>
+            <th>날짜</th>
+            <th>사용자</th>
+            <th>활동</th>
+            <th>상세</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td colspan="4" class="text-center">데이터가 없습니다.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
