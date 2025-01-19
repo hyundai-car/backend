@@ -4,6 +4,8 @@ import com.myme.mycarforme.domains.admin.api.response.NeedDeliveryListResponse;
 import com.myme.mycarforme.domains.admin.constant.ActivityType;
 import com.myme.mycarforme.domains.admin.dto.ActivityLogDto;
 import com.myme.mycarforme.domains.car.domain.Car;
+import com.myme.mycarforme.domains.car.domain.Like;
+import com.myme.mycarforme.domains.car.domain.Recommend;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
 import com.myme.mycarforme.domains.car.repository.LikeRepository;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +58,7 @@ public class AdminService {
 
     public Page<ActivityLogDto> getRecentActivities(Pageable pageable) {
         // Like 엔티티 조회 및 변환
-        List<ActivityLogDto> likeLogs = likeRepository.findAll()
+        List<ActivityLogDto> likeLogs = likeRepository.findTop100ByOrderByUpdatedAtDesc()
                 .stream()
                 .map(like -> ActivityLogDto.builder()
                         .activityDate(like.getUpdatedAt())
@@ -67,7 +70,7 @@ public class AdminService {
                 .toList();
 
         // Recommend 엔티티 조회 및 변환
-        List<ActivityLogDto> recommendLogs = recommendRepository.findAll()
+        List<ActivityLogDto> recommendLogs = recommendRepository.findTop100ByOrderByUpdatedAtDesc()
                 .stream()
                 .map(recommend -> ActivityLogDto.builder()
                         .activityDate(recommend.getUpdatedAt())
@@ -78,17 +81,15 @@ public class AdminService {
                         .build())
                 .toList();
 
-        // 두 리스트 합치기
+        // 두 리스트 합치기, 정렬, 페이징 처리
         List<ActivityLogDto> allActivities = new ArrayList<>();
         allActivities.addAll(likeLogs);
         allActivities.addAll(recommendLogs);
 
-        // updatedAt 기준으로 정렬
         List<ActivityLogDto> sortedActivities = allActivities.stream()
                 .sorted(Comparator.comparing(ActivityLogDto::activityDate).reversed())
                 .collect(Collectors.toList());
 
-        // 페이지네이션 적용
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), sortedActivities.size());
 

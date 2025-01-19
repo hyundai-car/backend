@@ -32,5 +32,5 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             "WHERE l.car.id = :carId AND l.userId = :userId AND l.isLike = true")
     Boolean existsByCarIdAndUserIdAndIsLikeTrue(@Param("carId") Long carId, @Param("userId") String userId);
 
-    List<Like> findTop10ByOrderByUpdatedAtDesc();
+    List<Like> findTop100ByOrderByUpdatedAtDesc();
 }
