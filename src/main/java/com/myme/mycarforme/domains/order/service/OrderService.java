@@ -3,7 +3,8 @@ package com.myme.mycarforme.domains.order.service;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
-import com.myme.mycarforme.domains.fcm.service.FCMTokenService;
+import com.myme.mycarforme.domains.order.exception.SmsSendException;
+import com.myme.mycarforme.global.common.fcm.service.FCMTokenService;
 import com.myme.mycarforme.domains.order.api.response.ContractResponse;
 import com.myme.mycarforme.domains.order.api.response.OrderStatusResponse;
 import com.myme.mycarforme.domains.order.api.response.OrderedCarListResponse;
@@ -13,6 +14,7 @@ import com.myme.mycarforme.domains.order.exception.DuplicatedOrderException;
 import com.myme.mycarforme.domains.order.exception.InvalidOrderStatusException;
 import com.myme.mycarforme.domains.order.exception.OrderNotFoundException;
 import com.myme.mycarforme.domains.order.exception.UserTrackingCodeNotFoundException;
+import com.myme.mycarforme.global.common.sms.service.SmsService;
 import com.myme.mycarforme.global.config.websocket.ActiveTrackingManager;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -25,10 +27,11 @@ public class OrderService {
     private final CarRepository carRepository;
     private final ActiveTrackingManager activeTrackingManager;
     private final FCMTokenService fcmTokenService;
+    private final SmsService smsService;
 
     public OrderedCarListResponse getOrderedCarList(String userId) {
         List<Car> orderedCarList = carRepository.findByBuyerId(userId);
-        List<Car> contractingList = carRepository.findByBuyerIdAndIsOnSale(userId, 1);
+        List<Car> contractingList = carRepository.findByBuyerIdAndIsOnSaleIn(userId, List.of(1,2));
 
         return contractingList.isEmpty()
                 ? OrderedCarListResponse.from(null, orderedCarList)
@@ -83,11 +86,19 @@ public class OrderService {
             }
         }
 
+        //문자 발송
+//        try {
+//            smsService.sendSms(phoneNumber,
+//                    "[MyCarForMe]\n" +
+//                            "계약 차량 : " + car.getCarName() + "\n" +
+//                            "계약금이 입금되었어요! 추가 문의를 원하신다면 문자 남겨주세요.");
+//        } catch (Exception e) {
+//            throw new SmsSendException();
+//        }
+
         // 계약 진행
         car.doContract(userId);
         Car updatedCar = carRepository.save(car);
-
-        // TODO : 문자 발송
 
         return ContractResponse.of(
                 userName,
@@ -175,16 +186,16 @@ public class OrderService {
             throw new InvalidOrderStatusException();
         }
 
-        // 배송 시작
-        car.doDeliveryStarted();
-        carRepository.save(car);
-
         //FCM 알림 발송
         fcmTokenService.sendNotification(
                 userId,
                 "MyCarForMe 차량 탁송 알림",
                 "차량 탁송이 시작됐어요!\n(" + car.getCarName() + ")"
         );
+
+        // 배송 시작
+        car.doDeliveryStarted();
+        carRepository.save(car);
     }
 
     @Transactional
@@ -216,16 +227,16 @@ public class OrderService {
             throw new InvalidOrderStatusException();
         }
 
-        // 배송 시작
-        car.doDeliveryEnded();
-        carRepository.save(car);
-
         // FCM 알림 발송
         fcmTokenService.sendNotification(
                 userId,
                 "MyCarForMe 차량 탁송 알림",
                 "차량 탁송이 완료되었어요!\n(" + car.getCarName() + ")"
         );
+
+        // 배송 시작
+        car.doDeliveryEnded();
+        carRepository.save(car);
     }
 
     public TrackingCodeResponse getTrackingCode(String userId) {

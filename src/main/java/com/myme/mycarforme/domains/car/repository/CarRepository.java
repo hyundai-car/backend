@@ -59,7 +59,7 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
 
     List<Car> findByBuyerIdAndIsOnSale(String userId, int isOnSale);
 
-    List<Car> findByBuyerIdAndIsOnSaleNot(String userId, int isOnSale);
+    List<Car> findByBuyerIdAndIsOnSaleIn(String userId, List<Integer> isOnSale);
 
     @Query("SELECT c FROM Car c " +
             "WHERE c.isOnSale = 1 " +
