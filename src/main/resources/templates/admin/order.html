@@ -63,15 +63,15 @@
             </td>
             <td>
               <div class="d-flex gap-2">
-                <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="me-2">
-                  <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <option value="">상태 변경</option>
-                    <option value="1">계약완료</option>
-                    <option value="2">결제완료</option>
-                    <option value="3">배송시작</option>
-                    <option value="4">배송완료</option>
-                  </select>
-                </form>
+<!--                <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="me-2">-->
+<!--                  <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">-->
+<!--                    <option value="">상태 변경</option>-->
+<!--                    <option value="1">계약완료</option>-->
+<!--                    <option value="2">결제완료</option>-->
+<!--                    <option value="3">배송시작</option>-->
+<!--                    <option value="4">배송완료</option>-->
+<!--                  </select>-->
+<!--                </form>-->
                 <form th:action="@{/admin/orders/{id}/reset(id=${order.id})}" method="post">
                   <button type="submit" class="btn btn-sm btn-outline-danger">초기화</button>
                 </form>
