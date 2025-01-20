@@ -44,15 +44,16 @@ public class AdminPageController {
         return "admin/dashboard";
     }
 
-    // 차량 관리 페이지 관련 엔드포인트 추가
     @GetMapping("/cars")
     public String carsList(
             Model model,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String carType,
+            @RequestParam(required = false) String fuelType,
             @RequestParam(required = false) Integer isOnSale,
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        Page<Car> carsPage = adminService.getCars(search, isOnSale, pageable);
+        Page<Car> carsPage = adminService.getCars(search, carType, fuelType, isOnSale, pageable);
         model.addAttribute("carsPage", carsPage);
         return "admin/cars";
     }

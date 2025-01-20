@@ -20,20 +20,53 @@
     <div class="card-body">
       <form th:action="@{/admin/cars}" method="get" class="row g-3">
         <div class="col-md-3">
-          <input type="text" class="form-control" name="search" placeholder="차량명 검색"
+          <input type="text" class="form-control" name="search" placeholder="차량명 또는 차량번호 검색"
                  th:value="${param.search}">
         </div>
         <div class="col-md-2">
-          <select class="form-select" name="status">
-            <option value="">상태 전체</option>
-            <option value="0">판매예정</option>
-            <option value="1">판매중</option>
-            <option value="2">결제완료</option>
-            <option value="3">판매완료</option>
+          <select class="form-select" name="carType">
+            <option value="">차량 전체</option>
+            <option value="passenger"
+                    th:selected="${#strings.equals(param.carType, 'passenger')}">일반</option>
+            <option value="luxury"
+                    th:selected="${#strings.equals(param.carType, 'luxury')}">제네시스</option>
+            <option value="suv"
+                    th:selected="${#strings.equals(param.carType, 'suv')}">SUV</option>
+            <option value="van"
+                    th:selected="${#strings.equals(param.carType, 'van')}">밴</option>
           </select>
         </div>
         <div class="col-md-2">
+          <select class="form-select" name="fuelType">
+            <option value="">연료 전체</option>
+            <option value="gasoline"
+                    th:selected="${#strings.equals(param.fuelType, 'gasoline')}">가솔린</option>
+            <option value="diesel"
+                    th:selected="${#strings.equals(param.fuelType, 'diesel')}">디젤</option>
+            <option value="hybrid"
+                    th:selected="${#strings.equals(param.fuelType, 'hybrid')}">하이브리드</option>
+            <option value="electric"
+                    th:selected="${#strings.equals(param.fuelType, 'electric')}">전기</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="isOnSale">
+            <option value="">상태 전체</option>
+            <option value="0"
+                    th:selected="${#strings.equals(param.isOnSale, '0')}">판매예정</option>
+            <option value="1"
+                    th:selected="${#strings.equals(param.isOnSale, '1')}">판매중</option>
+            <option value="2"
+                    th:selected="${#strings.equals(param.isOnSale, '2')}">결제완료</option>
+            <option value="3"
+                    th:selected="${#strings.equals(param.isOnSale, '3')}">판매완료</option>
+          </select>
+        </div>
+        <div class="col-md-1">
           <button type="submit" class="btn btn-secondary w-100">검색</button>
+        </div>
+        <div class="col-md-1">
+          <a th:href="@{/admin/cars}" class="btn btn-outline-secondary">초기화</a>
         </div>
       </form>
     </div>
@@ -50,7 +83,7 @@
             <th>차량 이미지</th>
             <th>차량번호</th>
             <th>차량명</th>
-            <th>브랜드</th>
+            <th>차량종류</th>
             <th>가격</th>
             <th>상태</th>
             <th>등록일</th>

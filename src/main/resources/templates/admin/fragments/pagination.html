@@ -5,12 +5,26 @@
     <ul class="pagination justify-content-center">
         <!-- Previous -->
         <li class="page-item" th:classappend="${carsPage.first} ? 'disabled'">
-            <a class="page-link" th:href="@{/admin/cars(page=${carsPage.number - 1}, size=${carsPage.size}, search=${param.search}, status=${param.status})}">&laquo;</a>
+            <a class="page-link" th:href="@{/admin/cars(
+                page=${carsPage.number - 1},
+                size=${carsPage.size},
+                search=${param.search},
+                carType=${param.carType},
+                fuelType=${param.fuelType},
+                isOnSale=${param.isOnSale}
+            )}">&laquo;</a>
         </li>
 
         <!-- First Page -->
         <li class="page-item" th:if="${carsPage.number > 3}">
-            <a class="page-link" th:href="@{/admin/cars(page=0, size=${carsPage.size}, search=${param.search}, status=${param.status})}">1</a>
+            <a class="page-link" th:href="@{/admin/cars(
+                page=0,
+                size=${carsPage.size},
+                search=${param.search},
+                carType=${param.carType},
+                fuelType=${param.fuelType},
+                isOnSale=${param.isOnSale}
+            )}">1</a>
         </li>
         <li class="page-item disabled" th:if="${carsPage.number > 3}">
             <span class="page-link">...</span>
@@ -24,7 +38,14 @@
             )}"
             th:classappend="${pageNum == carsPage.number} ? 'active'">
             <a class="page-link"
-               th:href="@{/admin/cars(page=${pageNum}, size=${carsPage.size}, search=${param.search}, status=${param.status})}"
+               th:href="@{/admin/cars(
+                   page=${pageNum},
+                   size=${carsPage.size},
+                   search=${param.search},
+                   carType=${param.carType},
+                   fuelType=${param.fuelType},
+                   isOnSale=${param.isOnSale}
+               )}"
                th:text="${pageNum + 1}">1</a>
         </li>
 
@@ -34,13 +55,27 @@
         </li>
         <li class="page-item" th:if="${carsPage.number < carsPage.totalPages - 4}">
             <a class="page-link"
-               th:href="@{/admin/cars(page=${carsPage.totalPages - 1}, size=${carsPage.size}, search=${param.search}, status=${param.status})}"
+               th:href="@{/admin/cars(
+                   page=${carsPage.totalPages - 1},
+                   size=${carsPage.size},
+                   search=${param.search},
+                   carType=${param.carType},
+                   fuelType=${param.fuelType},
+                   isOnSale=${param.isOnSale}
+               )}"
                th:text="${carsPage.totalPages}">Last</a>
         </li>
 
         <!-- Next -->
         <li class="page-item" th:classappend="${carsPage.last} ? 'disabled'">
-            <a class="page-link" th:href="@{/admin/cars(page=${carsPage.number + 1}, size=${carsPage.size}, search=${param.search}, status=${param.status})}">&raquo;</a>
+            <a class="page-link" th:href="@{/admin/cars(
+                page=${carsPage.number + 1},
+                size=${carsPage.size},
+                search=${param.search},
+                carType=${param.carType},
+                fuelType=${param.fuelType},
+                isOnSale=${param.isOnSale}
+            )}">&raquo;</a>
         </li>
     </ul>
 </nav>

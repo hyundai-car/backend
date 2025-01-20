@@ -103,18 +103,14 @@ public class AdminService {
         );
     }
 
-    public Page<Car> getCars(String search, Integer isOnSale, Pageable pageable) {
-        if (StringUtils.hasText(search) && isOnSale != null) {
-            return carRepository.findByCarNameContainingAndIsOnSaleOrderByIdDesc(
-                    search, isOnSale, pageable);
-        } else if (StringUtils.hasText(search)) {
-            return carRepository.findByCarNameContainingOrderByIdDesc(search, pageable);
-        } else if (isOnSale != null) {
-            return carRepository.findByIsOnSaleOrderByIdDesc(isOnSale, pageable);
-        }
-        return carRepository.findAll(PageRequest.of(pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "id")));
+    public Page<Car> getCars(String search, String carType, String fuelType, Integer isOnSale, Pageable pageable) {
+        return carRepository.findBySearchCriteria(
+                search,
+                carType,
+                fuelType,
+                isOnSale,
+                pageable
+        );
     }
 
     public Car getCarDetail(Long id) {

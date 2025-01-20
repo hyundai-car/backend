@@ -87,7 +87,16 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
             @Param("endOfDay") LocalDateTime endOfDay
     );
 
-    Page<Car> findByCarNameContainingAndIsOnSaleOrderByIdDesc(String carName, Integer isOnSale, Pageable pageable);
-    Page<Car> findByCarNameContainingOrderByIdDesc(String carName, Pageable pageable);
-    Page<Car> findByIsOnSaleOrderByIdDesc(Integer isOnSale, Pageable pageable);
+    @Query("SELECT c FROM Car c WHERE " +
+            "(:search IS NULL OR :search = '' OR c.carName LIKE %:search% OR c.carNumber LIKE %:search%) " +
+            "AND (:carType IS NULL OR :carType = '' OR c.carType = :carType) " +
+            "AND (:fuelType IS NULL OR :fuelType = '' OR c.fuelType = :fuelType) " +
+            "AND (:isOnSale IS NULL OR c.isOnSale = :isOnSale) " +
+            "ORDER BY c.id DESC")
+    Page<Car> findBySearchCriteria(
+            @Param("search") String search,
+            @Param("carType") String carType,
+            @Param("fuelType") String fuelType,
+            @Param("isOnSale") Integer isOnSale,
+            Pageable pageable);
 }
