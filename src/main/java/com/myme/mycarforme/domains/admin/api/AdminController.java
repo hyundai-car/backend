@@ -2,6 +2,7 @@ package com.myme.mycarforme.domains.admin.api;
 
 import com.myme.mycarforme.domains.admin.api.response.NeedDeliveryListResponse;
 import com.myme.mycarforme.domains.admin.service.AdminService;
+import com.myme.mycarforme.domains.car.dto.CarDetailDto;
 import com.myme.mycarforme.global.common.response.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,4 +29,5 @@ public class AdminController {
     public CommonResponse<NeedDeliveryListResponse> getNeedDeliveryList() {
         return CommonResponse.from(adminService.getNeedDelivery());
     }
+
 }
