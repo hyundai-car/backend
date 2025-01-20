@@ -52,7 +52,7 @@
             <td th:text="${order.id}"></td>
             <td th:text="${order.carName}"></td>
             <td th:text="${order.buyerId}"></td>
-            <td th:text="${#numbers.formatCurrency(order.sellingPrice)}"></td>
+            <td th:text="${#numbers.formatInteger(order.sellingPrice, 3, 'COMMA') + '만원'}"></td>
             <td>
                             <span th:switch="${order.paymentDeliveryStatus}">
                                 <span th:case="1" class="badge bg-warning">계약완료</span>
