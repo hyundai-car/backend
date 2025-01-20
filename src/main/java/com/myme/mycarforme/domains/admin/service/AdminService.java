@@ -122,4 +122,28 @@ public class AdminService {
     public void deleteCar(Long id) {
         carRepository.deleteById(id);
     }
+
+    public List<Car> getAllOrders() {
+        return carRepository.findAllOrdersByUpdatedAtDesc();
+    }
+
+    // 상태별 주문 조회
+    public List<Car> getOrdersByStatus(Integer status) {
+        return carRepository.findAllOrdersByStatusOrderByUpdatedAtDesc(status);
+    }
+
+    // 주문 상태 업데이트
+    @Transactional
+    public void updateOrderStatus(Long carId, Integer status) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 차량이 존재하지 않습니다."));
+
+        switch (status) {
+            case 1 -> car.doContract(car.getBuyerId());
+            case 2 -> car.doPay();
+            case 3 -> car.doDeliveryStarted();
+            case 4 -> car.doDeliveryEnded();
+        }
+    }
+
 }

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,12 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 @RequestMapping("/admin")
@@ -74,5 +81,30 @@ public class AdminPageController {
     public String deleteCar(@PathVariable Long id) {
         adminService.deleteCar(id);
         return "redirect:/admin/cars";
+
+    @GetMapping("/orders")
+    public String orders(@RequestParam(required = false) Integer status, Model model) {
+        List<Car> orders;
+        if (status != null) {
+            orders = adminService.getOrdersByStatus(status);
+        } else {
+            orders = adminService.getAllOrders();
+        }
+        model.addAttribute("orders", orders);
+        return "admin/order";
+    }
+
+    @PostMapping("/orders/{carId}/status")
+    public String updateOrderStatus(@PathVariable Long carId,
+            @RequestParam Integer status) {
+        adminService.updateOrderStatus(carId, status);
+        return "redirect:/admin/orders";
+    }
+
+    @PostMapping("/orders/{carId}/reset")
+    public String resetOrderStatus(@PathVariable Long carId) {
+        adminService.orderStatusReset(carId);
+        return "redirect:/admin/orders";
+
     }
 }

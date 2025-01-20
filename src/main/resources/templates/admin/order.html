@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+  <title>주문 관리</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <!-- 주문 관리 카드 -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 fw-bold">전체 주문 목록</h6>
+    </div>
+    <div class="card-body">
+      <!-- 필터링 옵션 -->
+      <div class="row mb-4">
+        <div class="col">
+          <form th:action="@{/admin/orders}" method="get" class="row g-3 align-items-center">
+            <div class="col-auto">
+              <select name="status" class="form-select form-select-sm" th:value="${param.status}">
+                <option value="" th:selected="${#strings.equals(param.status,'') || param.status == null}">전체 상태</option>
+                <option value="1" th:selected="${#strings.equals(param.status,'1')}">계약완료</option>
+                <option value="2" th:selected="${#strings.equals(param.status,'2')}">결제완료</option>
+                <option value="3" th:selected="${#strings.equals(param.status,'3')}">배송시작</option>
+                <option value="4" th:selected="${#strings.equals(param.status,'4')}">배송완료</option>
+              </select>
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-sm btn-primary">필터 적용</button>
+              <a th:href="@{/admin/orders}" class="btn btn-sm btn-secondary">초기화</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- 주문 목록 테이블 -->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+          <tr>
+            <th>주문 번호</th>
+            <th>차량 정보</th>
+            <th>구매자</th>
+            <th>판매 가격</th>
+            <th>주문 상태</th>
+            <th>액션</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td th:text="${order.carName}"></td>
+            <td th:text="${order.buyerId}"></td>
+            <td th:text="${#numbers.formatCurrency(order.sellingPrice)}"></td>
+            <td>
+                            <span th:switch="${order.paymentDeliveryStatus}">
+                                <span th:case="1" class="badge bg-warning">계약완료</span>
+                                <span th:case="2" class="badge bg-info">결제완료</span>
+                                <span th:case="3" class="badge bg-primary">배송시작</span>
+                                <span th:case="4" class="badge bg-success">배송완료</span>
+                            </span>
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+<!--                <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="me-2">-->
+<!--                  <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">-->
+<!--                    <option value="">상태 변경</option>-->
+<!--                    <option value="1">계약완료</option>-->
+<!--                    <option value="2">결제완료</option>-->
+<!--                    <option value="3">배송시작</option>-->
+<!--                    <option value="4">배송완료</option>-->
+<!--                  </select>-->
+<!--                </form>-->
+                <form th:action="@{/admin/orders/{id}/reset(id=${order.id})}" method="post">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">초기화</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(orders)}">
+            <td colspan="6" class="text-center">주문 데이터가 없습니다.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

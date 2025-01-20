@@ -99,4 +99,12 @@ public interface CarRepository  extends JpaRepository<Car, Long> {
             @Param("fuelType") String fuelType,
             @Param("isOnSale") Integer isOnSale,
             Pageable pageable);
+
+    @Query("SELECT c FROM Car c WHERE c.paymentDeliveryStatus != 0 ORDER BY c.updatedAt DESC")
+    List<Car> findAllOrdersByUpdatedAtDesc();
+
+    @Query("SELECT c FROM Car c WHERE c.paymentDeliveryStatus = :status ORDER BY c.updatedAt DESC")
+    List<Car> findAllOrdersByStatusOrderByUpdatedAtDesc(@Param("status") Integer status);
+
+
 }
