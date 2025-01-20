@@ -16,10 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin")
@@ -60,15 +57,21 @@ public class AdminPageController {
         return "admin/cars";
     }
 
+    @GetMapping("/cars/{id}/detail")
+    public String getCarDetail(@PathVariable Long id, Model model) {
+        model.addAttribute("car", adminService.getCarDetail(id));
+        return "admin/fragments/car-detail :: carDetailModal";
+    }
+
     @GetMapping("/cars/create")
     public String carCreateForm(Model model) {
 //        model.addAttribute("car", new CarForm());  // CarForm은 새로 만들어야 할 DTO
         return "admin/car-form";
     }
 
-    @GetMapping("/cars/{id}/edit")
-    public String carEditForm(@PathVariable Long id, Model model) {
-//        model.addAttribute("car", adminService.getCarById(id));  // 이 메서드도 구현 필요
-        return "admin/car-form";
+    @PostMapping("/cars/{id}/delete")
+    public String deleteCar(@PathVariable Long id) {
+        adminService.deleteCar(id);
+        return "redirect:/admin/cars";
     }
 }

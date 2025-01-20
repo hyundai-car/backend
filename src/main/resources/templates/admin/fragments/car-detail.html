@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="carDetailModal">
+    <div class="modal-header">
+        <h5 class="modal-title">차량 상세 정보</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6">
+                <img th:src="${car.mainImage}" alt="차량 이미지" class="img-fluid mb-3">  <!-- ${} 사용 -->
+            </div>
+            <div class="col-md-6">
+                <h4 th:text="${car.carName}"></h4>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <th>차량번호</th>
+                            <td th:text="${car.carNumber}"></td>
+                        </tr>
+                        <tr>
+                            <th>브랜드</th>
+                            <td th:text="${car.carType}"></td>
+                        </tr>
+                        <tr>
+                            <th>연식</th>
+                            <td th:text="${car.year}"></td>
+                        </tr>
+                        <tr>
+                            <th>주행거리</th>
+                            <td th:text="${car.mileage} + 'km'"></td>
+                        </tr>
+                        <tr>
+                            <th>연료</th>
+                            <td th:text="${car.fuelType}"></td>
+                        </tr>
+                        <tr>
+                            <th>변속기</th>
+                            <td th:text="${car.transmissionType}"></td>
+                        </tr>
+                        <tr>
+                            <th>색상</th>
+                            <td><span th:text="${car.exteriorColor}"></span> / <span th:text="${car.interiorColor}"></span></td>
+                        </tr>
+                        <tr>
+                            <th>가격</th>
+                            <td th:text="${#numbers.formatInteger(car.sellingPrice, 3, 'COMMA') + '만원'}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+    </div>
+</div>
+</html>

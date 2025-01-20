@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<nav th:fragment="pagination" aria-label="Page navigation"
+     th:if="${carsPage.totalPages > 1}">
+    <ul class="pagination justify-content-center">
+        <!-- Previous -->
+        <li class="page-item" th:classappend="${carsPage.first} ? 'disabled'">
+            <a class="page-link" th:href="@{/admin/cars(page=${carsPage.number - 1}, size=${carsPage.size}, search=${param.search}, status=${param.status})}">&laquo;</a>
+        </li>
+
+        <!-- First Page -->
+        <li class="page-item" th:if="${carsPage.number > 3}">
+            <a class="page-link" th:href="@{/admin/cars(page=0, size=${carsPage.size}, search=${param.search}, status=${param.status})}">1</a>
+        </li>
+        <li class="page-item disabled" th:if="${carsPage.number > 3}">
+            <span class="page-link">...</span>
+        </li>
+
+        <!-- Page numbers -->
+        <li class="page-item"
+            th:each="pageNum : ${#numbers.sequence(
+                carsPage.number > 2 ? carsPage.number - 2 : 0,
+                carsPage.number + 2 < carsPage.totalPages ? carsPage.number + 2 : carsPage.totalPages - 1
+            )}"
+            th:classappend="${pageNum == carsPage.number} ? 'active'">
+            <a class="page-link"
+               th:href="@{/admin/cars(page=${pageNum}, size=${carsPage.size}, search=${param.search}, status=${param.status})}"
+               th:text="${pageNum + 1}">1</a>
+        </li>
+
+        <!-- Last Page -->
+        <li class="page-item disabled" th:if="${carsPage.number < carsPage.totalPages - 4}">
+            <span class="page-link">...</span>
+        </li>
+        <li class="page-item" th:if="${carsPage.number < carsPage.totalPages - 4}">
+            <a class="page-link"
+               th:href="@{/admin/cars(page=${carsPage.totalPages - 1}, size=${carsPage.size}, search=${param.search}, status=${param.status})}"
+               th:text="${carsPage.totalPages}">Last</a>
+        </li>
+
+        <!-- Next -->
+        <li class="page-item" th:classappend="${carsPage.last} ? 'disabled'">
+            <a class="page-link" th:href="@{/admin/cars(page=${carsPage.number + 1}, size=${carsPage.size}, search=${param.search}, status=${param.status})}">&raquo;</a>
+        </li>
+    </ul>
+</nav>
+</html>

@@ -6,6 +6,7 @@ import com.myme.mycarforme.domains.admin.dto.ActivityLogDto;
 import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Like;
 import com.myme.mycarforme.domains.car.domain.Recommend;
+import com.myme.mycarforme.domains.car.dto.CarDetailDto;
 import com.myme.mycarforme.domains.car.exception.CarNotFoundException;
 import com.myme.mycarforme.domains.car.repository.CarRepository;
 import com.myme.mycarforme.domains.car.repository.LikeRepository;
@@ -114,5 +115,15 @@ public class AdminService {
         return carRepository.findAll(PageRequest.of(pageable.getPageNumber(),
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "id")));
+    }
+
+    public Car getCarDetail(Long id) {
+        return carRepository.findById(id)
+                .orElseThrow(CarNotFoundException::new);
+    }
+
+    @Transactional
+    public void deleteCar(Long id) {
+        carRepository.deleteById(id);
     }
 }
