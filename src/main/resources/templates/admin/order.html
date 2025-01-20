@@ -18,12 +18,12 @@
         <div class="col">
           <form th:action="@{/admin/orders}" method="get" class="row g-3 align-items-center">
             <div class="col-auto">
-              <select name="status" class="form-select form-select-sm">
-                <option value="">전체 상태</option>
-                <option value="1">계약완료</option>
-                <option value="2">결제완료</option>
-                <option value="3">배송시작</option>
-                <option value="4">배송완료</option>
+              <select name="status" class="form-select form-select-sm" th:value="${param.status}">
+                <option value="" th:selected="${#strings.equals(param.status,'') || param.status == null}">전체 상태</option>
+                <option value="1" th:selected="${#strings.equals(param.status,'1')}">계약완료</option>
+                <option value="2" th:selected="${#strings.equals(param.status,'2')}">결제완료</option>
+                <option value="3" th:selected="${#strings.equals(param.status,'3')}">배송시작</option>
+                <option value="4" th:selected="${#strings.equals(param.status,'4')}">배송완료</option>
               </select>
             </div>
             <div class="col-auto">
