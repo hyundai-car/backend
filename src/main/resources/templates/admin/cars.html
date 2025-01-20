@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+  <title>차량 관리</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <!-- 상단 버튼 영역 -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>차량 관리</h2>
+    <a th:href="@{/admin/cars/create}" class="btn btn-primary">
+      차량 등록
+    </a>
+  </div>
+
+  <!-- 검색 필터 영역 -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form th:action="@{/admin/cars}" method="get" class="row g-3">
+        <div class="col-md-3">
+          <input type="text" class="form-control" name="search" placeholder="차량명 또는 차량번호 검색"
+                 th:value="${param.search}">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="carType">
+            <option value="">차량 전체</option>
+            <option value="passenger"
+                    th:selected="${#strings.equals(param.carType, 'passenger')}">일반</option>
+            <option value="luxury"
+                    th:selected="${#strings.equals(param.carType, 'luxury')}">제네시스</option>
+            <option value="suv"
+                    th:selected="${#strings.equals(param.carType, 'suv')}">SUV</option>
+            <option value="van"
+                    th:selected="${#strings.equals(param.carType, 'van')}">밴</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="fuelType">
+            <option value="">연료 전체</option>
+            <option value="gasoline"
+                    th:selected="${#strings.equals(param.fuelType, 'gasoline')}">가솔린</option>
+            <option value="diesel"
+                    th:selected="${#strings.equals(param.fuelType, 'diesel')}">디젤</option>
+            <option value="hybrid"
+                    th:selected="${#strings.equals(param.fuelType, 'hybrid')}">하이브리드</option>
+            <option value="electric"
+                    th:selected="${#strings.equals(param.fuelType, 'electric')}">전기</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="isOnSale">
+            <option value="">상태 전체</option>
+            <option value="0"
+                    th:selected="${#strings.equals(param.isOnSale, '0')}">판매예정</option>
+            <option value="1"
+                    th:selected="${#strings.equals(param.isOnSale, '1')}">판매중</option>
+            <option value="2"
+                    th:selected="${#strings.equals(param.isOnSale, '2')}">결제완료</option>
+            <option value="3"
+                    th:selected="${#strings.equals(param.isOnSale, '3')}">판매완료</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-secondary w-100">검색</button>
+        </div>
+        <div class="col-md-1">
+          <a th:href="@{/admin/cars}" class="btn btn-outline-secondary">초기화</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 차량 목록 테이블 -->
+  <div class="card shadow">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>차량 이미지</th>
+            <th>차량번호</th>
+            <th>차량명</th>
+            <th>차량종류</th>
+            <th>가격</th>
+            <th>상태</th>
+            <th>등록일</th>
+            <th>관리</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="car : ${carsPage.content}"
+              th:data-car-id="${car.id}"
+              th:onclick="'showCarDetail(' + ${car.id} + ')'"
+              class="clickable-row"
+              style="cursor: pointer">
+            <td th:text="${car.id}">1</td>
+            <td>
+              <img th:src="${car.mainImage}" alt="차량 이미지" style="width: 100px; height: 50px;">
+            </td>
+            <td th:text="${car.carNumber}">차량번호</td>
+            <td th:text="${car.carName}">차량명</td>
+            <td th:text="${car.carType}">차종</td>
+            <td th:text="${#numbers.formatInteger(car.sellingPrice, 3, 'COMMA') + '만원'}">가격</td>
+            <td>
+              <span class="badge"
+                    th:classappend="${car.isOnSale == 0 ? 'bg-info' : (car.isOnSale == 1 ? 'bg-success' : 'bg-secondary')}"
+                    th:text="${car.isOnSale == 0 ? '판매예정' : (car.isOnSale == 1 ? '판매중' : (car.isOnSale == 2 ? '결제완료' : '판매완료'))}">
+              </span>
+            </td>
+            <td th:text="${#temporals.format(car.createdAt, 'yyyy-MM-dd')}">2024-01-19</td>
+            <td class="action-buttons">
+              <button type="button" class="btn btn-sm btn-outline-danger"
+                      th:onclick="'showDeleteConfirm(' + ${car.id} + ', event)'">삭제</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+
+        <!-- 페이지네이션 -->
+        <nav th:replace="~{admin/fragments/pagination :: pagination}"></nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- 차량 상세 정보 모달 -->
+  <div class="modal fade" id="carDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <!-- 여기에 fragment가 로드됨 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">차량 삭제</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          정말 이 차량(차량 ID: <span id="deleteCarId"></span>)을 삭제하시겠습니까?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+          <form id="deleteForm" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-danger">삭제</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="script">
+  <!-- JavaScript 부분 -->
+  <script th:inline="javascript">
+    const carDetailModal = new bootstrap.Modal(document.getElementById('carDetailModal'));
+    const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    const deleteForm = document.getElementById('deleteForm');
+
+    function showCarDetail(carId) {
+      fetch(`/admin/cars/${carId}/detail`)
+              .then(response => response.text())
+              .then(html => {
+                document.querySelector('#carDetailModal .modal-content').innerHTML = html;
+                carDetailModal.show();
+              });
+    }
+
+    function showDeleteConfirm(carId, event) {
+      // 이벤트 전파 중단
+      event.stopPropagation();
+
+      // 모달에 차량 ID 표시
+      document.getElementById('deleteCarId').textContent = carId;
+
+      // 삭제 폼의 action URL 설정
+      deleteForm.action = `/admin/cars/${carId}/delete`;
+
+      // 삭제 확인 모달 표시
+      deleteConfirmModal.show();
+    }
+  </script>
+</th:block>
+</body>
+</html>

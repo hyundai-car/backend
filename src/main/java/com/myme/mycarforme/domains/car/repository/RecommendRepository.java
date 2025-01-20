@@ -1,6 +1,5 @@
 package com.myme.mycarforme.domains.car.repository;
 
-import com.myme.mycarforme.domains.car.domain.Car;
 import com.myme.mycarforme.domains.car.domain.Recommend;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +17,5 @@ public interface RecommendRepository extends JpaRepository<Recommend, Long> {
     List<Recommend> findTop10RecommendHistory(@Param("userId") String userId);
 
 
+    List<Recommend> findTop100ByOrderByUpdatedAtDesc();
 }
