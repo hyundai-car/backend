@@ -58,7 +58,7 @@ public class AdminPageController {
 
     @PostMapping("/orders/{carId}/reset")
     public String resetOrderStatus(@PathVariable Long carId) {
-        adminService.resetOrderStatus(carId);
+        adminService.orderStatusReset(carId);
         return "redirect:/admin/orders";
     }
 }

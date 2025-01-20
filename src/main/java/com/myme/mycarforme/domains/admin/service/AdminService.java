@@ -67,14 +67,5 @@ public class AdminService {
         }
     }
 
-    // 주문 상태 초기화
-    @Transactional
-    public void resetOrderStatus(Long carId) {
-        Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 차량이 존재하지 않습니다."));
-        car.resetOrderStatus();
-    }
-
-
 
 }
