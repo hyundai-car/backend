@@ -64,7 +64,7 @@ public class OrderService {
                 .orElseThrow(CarNotFoundException::new);
 
         // 해당 차량의 주문 상태 체크
-        if (car.getBuyerId() != null) {
+        if (car.getBuyerId() != null && !car.getBuyerId().isEmpty()) {
             // 1. 내가 주문한 차량인 경우
             if (car.getBuyerId().equals(userId)) {
                 if (car.getPaymentDeliveryStatus() != 0) {
