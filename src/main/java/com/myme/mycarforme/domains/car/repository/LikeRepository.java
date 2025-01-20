@@ -2,6 +2,7 @@ package com.myme.mycarforme.domains.car.repository;
 
 import com.myme.mycarforme.domains.admin.dto.ActivityEntityDto;
 import com.myme.mycarforme.domains.car.domain.Like;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
@@ -30,4 +31,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Like l " +
             "WHERE l.car.id = :carId AND l.userId = :userId AND l.isLike = true")
     Boolean existsByCarIdAndUserIdAndIsLikeTrue(@Param("carId") Long carId, @Param("userId") String userId);
+
+    List<Like> findTop100ByOrderByUpdatedAtDesc();
 }

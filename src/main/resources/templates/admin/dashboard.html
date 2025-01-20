@@ -59,15 +59,42 @@
             <th>날짜</th>
             <th>사용자</th>
             <th>활동</th>
-            <th>상세</th>
+            <th>차량 ID</th>
+            <th>차량명</th>
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td colspan="4" class="text-center">데이터가 없습니다.</td>
+          <tr th:each="activity : ${activitiesPage}">
+            <td th:text="${#temporals.format(activity.activityDate, 'yyyy-MM-dd HH:mm')}">날짜</td>
+            <td th:text="${activity.username}">사용자</td>
+            <td th:text="${activity.activityType.status}">활동</td>
+            <td th:text="${activity.carId}">차량 ID</td>
+            <td th:text="${activity.carName}">차량명</td>
+          </tr>
+          <tr th:if="${activitiesPage.content.isEmpty()}">
+            <td colspan="5" class="text-center">데이터가 없습니다.</td>
           </tr>
           </tbody>
         </table>
+
+        <!-- 페이지네이션 -->
+        <nav aria-label="Page navigation" th:if="${activitiesPage.totalPages > 1}">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${activitiesPage.first} ? 'disabled'">
+              <a class="page-link" th:href="@{/admin/dashboard(page=${activitiesPage.number - 1})}">&laquo;</a>
+            </li>
+
+            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, activitiesPage.totalPages - 1)}"
+                th:classappend="${pageNumber == activitiesPage.number} ? 'active'">
+              <a class="page-link" th:href="@{/admin/dashboard(page=${pageNumber})}"
+                 th:text="${pageNumber + 1}">1</a>
+            </li>
+
+            <li class="page-item" th:classappend="${activitiesPage.last} ? 'disabled'">
+              <a class="page-link" th:href="@{/admin/dashboard(page=${activitiesPage.number + 1})}">&raquo;</a>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>
