@@ -81,6 +81,7 @@ public class AdminPageController {
     public String deleteCar(@PathVariable Long id) {
         adminService.deleteCar(id);
         return "redirect:/admin/cars";
+    }
 
     @GetMapping("/orders")
     public String orders(@RequestParam(required = false) Integer status, Model model) {
