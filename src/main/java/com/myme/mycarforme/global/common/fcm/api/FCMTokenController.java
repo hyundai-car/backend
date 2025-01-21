@@ -17,11 +17,11 @@ public class FCMTokenController {
     private final FCMTokenService fcmTokenService;
 
     @PostMapping("/token")
-    public CommonResponse<Void> registerToken(
+    public CommonResponse<String> registerToken(
             @RequestBody FCMTokenRequest token
     ) {
         String userId = SecurityUtil.getUserId();
         fcmTokenService.updateFCMToken(userId, token.token());
-        return CommonResponse.empty();
+        return CommonResponse.from("successfully registered token");
     }
 }
