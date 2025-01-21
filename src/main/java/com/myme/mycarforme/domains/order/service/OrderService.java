@@ -87,14 +87,14 @@ public class OrderService {
         }
 
         //문자 발송
-        try {
-            smsService.sendSms(phoneNumber,
-                    "[MyCarForMe]\n" +
-                            "계약 차량 : " + car.getCarName() + "\n" +
-                            "계약금이 입금되었어요! 추가 문의를 원하신다면 문자 남겨주세요.");
-        } catch (Exception e) {
-            throw new SmsSendException();
-        }
+//        try {
+//            smsService.sendSms(phoneNumber,
+//                    "[MyCarForMe]\n" +
+//                            "계약 차량 : " + car.getCarName() + "\n" +
+//                            "계약금이 입금되었어요! 추가 문의를 원하신다면 문자 남겨주세요.");
+//        } catch (Exception e) {
+//            throw new SmsSendException();
+//        }
 
         // 계약 진행
         car.doContract(userId);
